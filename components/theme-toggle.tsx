@@ -1,3 +1,20 @@
+/**
+ * @file theme-toggle.tsx
+ * @description Theme toggle button component
+ *
+ * A button that toggles between dark and light themes.
+ * Uses next-themes for theme management.
+ *
+ * Features:
+ * - Displays sun icon for dark mode (to switch to light)
+ * - Displays moon icon for light mode (to switch to dark)
+ * - Handles hydration mismatch with mounted state
+ * - Accessible with aria-label
+ *
+ * Key exports:
+ * - ThemeToggle: Theme toggle button component
+ */
+
 'use client';
 
 import * as React from 'react';

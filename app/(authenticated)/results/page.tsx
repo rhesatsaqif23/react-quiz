@@ -1,3 +1,24 @@
+/**
+ * @file page.tsx
+ * @description Quiz results page component
+ *
+ * Displays the results of a completed quiz including:
+ * - Overall score percentage
+ * - Statistics grid (total questions, answered, correct, incorrect)
+ * - Time taken to complete the quiz
+ * - Detailed review of each question with correct/incorrect indicators
+ *
+ * Features:
+ * - Loads results from localStorage
+ * - Redirects to login if unauthenticated
+ * - Redirects to home if no results available
+ * - Color-coded difficulty levels (easy/medium/hard)
+ * - Green/red indicators for correct/incorrect answers
+ *
+ * Key exports:
+ * - ResultsPage: Main results page component
+ */
+
 'use client';
 
 import React from 'react';

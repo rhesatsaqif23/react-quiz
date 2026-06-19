@@ -1,3 +1,21 @@
+/**
+ * @file quiz-config-form.tsx
+ * @description Quiz configuration form component
+ *
+ * Provides a form for users to customize their quiz settings before starting.
+ * Saves configuration to localStorage and navigates to the quiz page.
+ *
+ * Features:
+ * - Number of questions slider (5, 10, 15, 20, 25, 30)
+ * - Category selection dropdown (24 trivia categories)
+ * - Difficulty selection (Any, Easy, Medium, Hard)
+ * - Question type selection (Any, Multiple Choice, True/False)
+ * - Saves config to localStorage before starting quiz
+ *
+ * Key exports:
+ * - QuizConfigForm: Configuration form component
+ */
+
 'use client';
 
 import React from 'react';

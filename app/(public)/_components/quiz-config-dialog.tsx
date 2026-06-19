@@ -1,3 +1,14 @@
+/**
+ * @file quiz-config-dialog.tsx
+ * @description Dialog wrapper for quiz configuration form
+ *
+ * A modal dialog component that wraps the QuizConfigForm component.
+ * Used on the home page to display quiz configuration options.
+ *
+ * Key exports:
+ * - QuizConfigDialog: Dialog component for quiz configuration
+ */
+
 'use client';
 
 import React from 'react';

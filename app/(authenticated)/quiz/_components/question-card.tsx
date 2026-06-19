@@ -1,3 +1,21 @@
+/**
+ * @file question-card.tsx
+ * @description Question display component for the quiz interface
+ *
+ * Renders a quiz question with its answer options in a card layout.
+ * Each answer option is displayed as a button with a letter label (A, B, C, D).
+ *
+ * Features:
+ * - Displays question text in a styled card
+ * - Shows answer options in a 2-column grid layout
+ * - Highlights selected answer with primary color styling
+ * - Uses React.memo for performance optimization
+ * - Responsive design for different screen sizes
+ *
+ * Key exports:
+ * - QuestionCard: Memoized component for displaying quiz questions
+ */
+
 'use client';
 
 import React from 'react';

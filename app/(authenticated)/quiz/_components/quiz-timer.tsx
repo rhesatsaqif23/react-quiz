@@ -1,3 +1,23 @@
+/**
+ * @file quiz-timer.tsx
+ * @description Timer components for the quiz interface
+ *
+ * Provides two timer components:
+ * - QuestionTimer: Per-question countdown timer (30 seconds default)
+ *   - Turns red when time is running low (≤10 seconds)
+ *   - Calls onTimeout callback when time expires
+ *   - Resets when questionStartedAt changes
+ *
+ * - GlobalTimer: Overall quiz timer showing total remaining time
+ *   - Calculates total time based on number of questions × 30 seconds
+ *   - Displays formatted MM:SS time remaining
+ *   - Turns red when time is running low (≤60 seconds)
+ *
+ * Key exports:
+ * - QuestionTimer: Per-question timer component
+ * - GlobalTimer: Overall quiz timer component
+ */
+
 'use client';
 
 import React from 'react';

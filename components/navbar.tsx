@@ -1,3 +1,24 @@
+/**
+ * @file navbar.tsx
+ * @description Navigation bar component
+ *
+ * Main navigation bar that appears on all pages. Displays:
+ * - QuizTime logo and brand name
+ * - User name when authenticated
+ * - Login/Register buttons when unauthenticated
+ * - Logout button when authenticated
+ * - Theme toggle button
+ *
+ * Features:
+ * - Fixed position at top of page
+ * - Backdrop blur effect
+ * - Responsive design
+ * - Session-based conditional rendering
+ *
+ * Key exports:
+ * - Navbar: Navigation bar component
+ */
+
 'use client';
 
 import React from 'react';

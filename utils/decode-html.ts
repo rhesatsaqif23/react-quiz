@@ -1,3 +1,23 @@
+/**
+ * @file decode-html.ts
+ * @description HTML entity decoding utility functions
+ *
+ * Provides functions to decode HTML entities from the Open Trivia Database API.
+ * The API returns questions with HTML-encoded characters that need to be decoded.
+ *
+ * Features:
+ * - decodeHtml: Decodes HTML entities (supports both server and client-side)
+ *   - Server-side: Uses regex-based decoder
+ *   - Client-side: Uses DOM textarea element
+ * - decodeQuizQuestion: Decodes and formats a quiz question object
+ *   - Decodes question text, correct answer, and incorrect answers
+ *   - Creates shuffled allAnswers array
+ *
+ * Key exports:
+ * - decodeHtml: Function to decode HTML entities
+ * - decodeQuizQuestion: Function to decode and format quiz questions
+ */
+
 export const decodeHtml = (html: string): string => {
   if (typeof window === 'undefined') {
     // Server-side: use a simple regex-based decoder

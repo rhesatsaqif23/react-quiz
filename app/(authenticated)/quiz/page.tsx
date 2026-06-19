@@ -1,3 +1,25 @@
+/**
+ * @file page.tsx
+ * @description Quiz page component for the authenticated quiz experience
+ *
+ * This is the main quiz page that manages the entire quiz lifecycle:
+ * - Fetches questions from Open Trivia Database API based on saved config
+ * - Manages quiz state (current question, answers, timer)
+ * - Persists quiz state to localStorage for resume functionality
+ * - Handles question timeouts and quiz completion
+ * - Redirects to results page when quiz is completed
+ *
+ * Key components used:
+ * - QuestionCard: Displays current question with answer options
+ * - QuestionTimer: Countdown timer for each question (30 seconds)
+ * - GlobalTimer: Overall quiz timer
+ * - QuizProgress: Shows current question number
+ *
+ * State management:
+ * - Uses React useState for local state
+ * - Persists to localStorage for quiz resume capability
+ */
+
 'use client';
 
 import React, { Suspense } from 'react';

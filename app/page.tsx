@@ -1,3 +1,18 @@
+/**
+ * @file page.tsx
+ * @description Home page of the QuizTime application
+ *
+ * This is the main landing page that greets users and provides options to start
+ * or resume a quiz. It checks for active quiz state in localStorage and displays
+ * appropriate buttons based on authentication status and quiz state.
+ *
+ * Key features:
+ * - Animated 3D background with floating shapes
+ * - Start Quiz button (opens config dialog for authenticated users)
+ * - Resume Quiz button (visible if there's an active quiz in localStorage)
+ * - Redirects unauthenticated users to login page
+ */
+
 'use client';
 
 import React, { useState } from 'react';

@@ -1,3 +1,20 @@
+/**
+ * @file page.tsx
+ * @description Login page component
+ *
+ * Provides the login interface for users to authenticate.
+ * If user is already logged in, redirects to home page.
+ *
+ * Features:
+ * - Session-based redirect (authenticated users go to home)
+ * - Loading state while checking session
+ * - Animated background with floating shapes
+ * - Renders LoginForm component for the actual form
+ *
+ * Key exports:
+ * - LoginPage: Main login page component
+ */
+
 'use client';
 
 import React from 'react';

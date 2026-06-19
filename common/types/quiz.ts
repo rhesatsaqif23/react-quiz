@@ -1,3 +1,17 @@
+/**
+ * @file quiz.ts
+ * @description TypeScript type definitions for quiz-related data
+ *
+ * Defines all the interfaces and types used throughout the quiz application:
+ * - QuizConfig: Configuration settings for a quiz session
+ * - Question: Individual quiz question with answers
+ * - QuizState: Current state of an active quiz session
+ * - QuestionResult: Result data for a single question after quiz completion
+ * - QuizResults: Aggregated results data for a completed quiz
+ *
+ * These types are used across the application for type safety and consistency.
+ */
+
 export interface QuizConfig {
   amount: number;
   category: number;

@@ -1,3 +1,14 @@
+/**
+ * @file quiz-progress.tsx
+ * @description Progress indicator component for the quiz
+ *
+ * Displays the current question number out of total questions.
+ * Shows a simple text indicator and a progress bar.
+ *
+ * Key exports:
+ * - QuizProgress: Component showing quiz progress
+ */
+
 'use client';
 
 import React from 'react';

@@ -1,3 +1,24 @@
+/**
+ * @file auth.ts
+ * @description NextAuth.js configuration and authentication setup
+ *
+ * Configures NextAuth.js with Credentials provider for email/password authentication.
+ * Uses Prisma to query the database for user validation and bcrypt for password hashing.
+ *
+ * Features:
+ * - Credentials provider with email/password authentication
+ * - JWT session strategy
+ * - Custom callbacks for JWT and session handling
+ * - Custom sign-in page configuration (/login)
+ * - Database integration via Prisma ORM
+ *
+ * Key exports:
+ * - handlers: NextAuth route handlers
+ * - signIn: Sign-in function
+ * - signOut: Sign-out function
+ * - auth: Authentication function for middleware
+ */
+
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';

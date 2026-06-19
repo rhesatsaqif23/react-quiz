@@ -1,3 +1,22 @@
+/**
+ * @file login-form.tsx
+ * @description Login form component with validation
+ *
+ * Provides a form for users to log in with email and password.
+ * Uses react-hook-form with Zod validation for form handling.
+ *
+ * Features:
+ * - Email and password validation with Zod schema
+ * - Password visibility toggle
+ * - Loading state during authentication
+ * - Toast notifications for success/error messages
+ * - Integration with NextAuth signIn function
+ * - Redirects to home page on successful login
+ *
+ * Key exports:
+ * - LoginForm: Login form component
+ */
+
 'use client';
 
 import React, { useState } from 'react';

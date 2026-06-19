@@ -1,3 +1,20 @@
+/**
+ * @file page.tsx
+ * @description Registration page component
+ *
+ * Provides the registration interface for new users to create an account.
+ * If user is already logged in, redirects to home page.
+ *
+ * Features:
+ * - Session-based redirect (authenticated users go to home)
+ * - Loading state while checking session
+ * - Animated background with floating shapes
+ * - Renders RegisterForm component for the actual form
+ *
+ * Key exports:
+ * - RegisterPage: Main registration page component
+ */
+
 'use client';
 
 import React from 'react';

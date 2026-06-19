@@ -1,3 +1,26 @@
+/**
+ * @file register-form.tsx
+ * @description Registration form component with validation
+ *
+ * Provides a form for new users to create an account with name, email, and password.
+ * Uses react-hook-form with Zod validation for form handling.
+ *
+ * Features:
+ * - Comprehensive form validation with Zod schema:
+ *   - Name: 8-30 characters
+ *   - Email: Valid email format
+ *   - Password: 8-20 characters, uppercase, number, symbol required
+ *   - Confirm password: Must match password
+ * - Password visibility toggles for both password fields
+ * - Loading state during registration
+ * - Toast notifications for success/error messages
+ * - Integration with registration API endpoint
+ * - Auto-login after successful registration
+ *
+ * Key exports:
+ * - RegisterForm: Registration form component
+ */
+
 'use client';
 
 import React, { useState } from 'react';

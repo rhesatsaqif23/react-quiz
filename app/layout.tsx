@@ -1,3 +1,15 @@
+/**
+ * @file layout.tsx
+ * @description Root layout component for the QuizTime application
+ *
+ * This is the root layout that wraps all pages with necessary providers:
+ * - ThemeProvider for dark/light mode support
+ * - AuthProvider for authentication context (NextAuth SessionProvider)
+ * - Toaster for toast notifications
+ *
+ * It also configures the Jost font and sets up global metadata for the app.
+ */
+
 import type { Metadata } from 'next';
 import { Jost } from 'next/font/google';
 import { AuthProvider } from '@/providers/auth-provider';

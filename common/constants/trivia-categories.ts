@@ -1,3 +1,17 @@
+/**
+ * @file trivia-categories.ts
+ * @description Constants for trivia quiz configuration
+ *
+ * Defines all the constant values used for quiz configuration:
+ * - TRIVIA_CATEGORIES: List of 24 trivia categories from Open Trivia Database
+ * - QUIZ_DIFFICULTIES: Available difficulty levels (Any, Easy, Medium, Hard)
+ * - QUIZ_TYPES: Question types (Any, Multiple Choice, True/False)
+ * - QUIZ_AMOUNTS: Available question counts (5, 10, 15, 20, 25, 30)
+ * - DEFAULT_QUIZ_CONFIG: Default configuration values
+ *
+ * These constants are used by the QuizConfigForm component and quiz state management.
+ */
+
 export const TRIVIA_CATEGORIES = [
   { id: 0, name: 'Any Category' },
   { id: 9, name: 'General Knowledge' },

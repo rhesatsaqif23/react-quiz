@@ -1,3 +1,19 @@
+/**
+ * @file use-auth.ts
+ * @description Custom hook for authentication state management
+ *
+ * Provides a convenient hook for accessing authentication state and functions.
+ * Wraps NextAuth's useSession hook and adds additional functionality.
+ *
+ * Features:
+ * - Access current user session data
+ * - Check authentication status (isAuthenticated, isLoading)
+ * - Logout function that redirects to login page
+ *
+ * Key exports:
+ * - useAuth: Custom hook returning auth state and functions
+ */
+
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
