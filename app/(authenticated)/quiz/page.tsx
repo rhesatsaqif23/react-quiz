@@ -12,7 +12,6 @@ import { QuestionCard } from './_components/question-card';
 import { QuizTimer } from './_components/quiz-timer';
 import { QuizProgress } from './_components/quiz-progress';
 
-const TIME_PER_QUESTION = 60;
 const STORAGE_KEY_QUIZ_STATE = 'quizState';
 const STORAGE_KEY_QUIZ_CONFIG = 'quizConfig';
 const STORAGE_KEY_QUIZ_RESULTS = 'quizResults';
@@ -39,7 +38,7 @@ function getInitialState(): QuizState {
       config: DEFAULT_QUIZ_CONFIG,
       currentIndex: 0,
       answers: {},
-      timeRemaining: TIME_PER_QUESTION,
+      startedAt: Date.now(),
       status: 'idle',
     };
   }
@@ -61,7 +60,7 @@ function getInitialState(): QuizState {
     config: getConfigFromStorage(),
     currentIndex: 0,
     answers: {},
-    timeRemaining: TIME_PER_QUESTION,
+    startedAt: Date.now(),
     status: 'idle',
   };
 }
@@ -121,7 +120,7 @@ function QuizContent() {
         config: quizConfig,
         currentIndex: 0,
         answers: {},
-        timeRemaining: TIME_PER_QUESTION,
+        startedAt: Date.now(),
         status: 'active',
       }));
     } catch (err) {
@@ -169,17 +168,8 @@ function QuizContent() {
         ...prev,
         answers: newAnswers,
         currentIndex: nextIndex,
-        timeRemaining: TIME_PER_QUESTION,
       };
     });
-  }, []);
-
-  const handleTimeUp = React.useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      status: 'timeout',
-    }));
-    localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
   }, []);
 
   React.useEffect(() => {
@@ -193,8 +183,7 @@ function QuizContent() {
         }
       });
 
-      const totalTimeTaken =
-        state.currentIndex * TIME_PER_QUESTION + (TIME_PER_QUESTION - state.timeRemaining);
+      const timeTaken = Math.floor((Date.now() - state.startedAt) / 1000);
 
       const results = {
         totalQuestions: state.questions.length,
@@ -202,7 +191,7 @@ function QuizContent() {
         correctAnswers: correct,
         incorrectAnswers: answered - correct,
         score: state.questions.length > 0 ? Math.round((correct / state.questions.length) * 100) : 0,
-        timeTaken: totalTimeTaken,
+        timeTaken,
       };
       localStorage.setItem(STORAGE_KEY_QUIZ_RESULTS, JSON.stringify(results));
       router.push('/results');
@@ -264,11 +253,7 @@ function QuizContent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-3xl space-y-6">
-        <QuizTimer
-          timeRemaining={state.timeRemaining}
-          totalTime={TIME_PER_QUESTION}
-          onTimeUp={handleTimeUp}
-        />
+        <QuizTimer startedAt={state.startedAt} />
         <QuizProgress
           currentQuestion={state.currentIndex + 1}
           totalQuestions={state.questions.length}

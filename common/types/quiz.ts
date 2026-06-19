@@ -21,7 +21,7 @@ export interface QuizState {
   config: QuizConfig;
   currentIndex: number;
   answers: Record<number, string>;
-  timeRemaining: number;
+  startedAt: number;
   status: 'idle' | 'active' | 'completed' | 'timeout';
 }
 
