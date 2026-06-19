@@ -22,13 +22,15 @@ export function ThemeToggle() {
     );
   }
 
+  const isDark = theme === 'dark';
+
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 dark:border-white/20 dark:bg-white/10 light:border-black/20 light:bg-black/10 light:text-black"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? (
+      {isDark ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"

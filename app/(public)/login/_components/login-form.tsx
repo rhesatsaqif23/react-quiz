@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -23,7 +24,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,7 +36,6 @@ export const LoginForm = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setError(null);
     setIsLoading(true);
 
     try {
@@ -47,13 +46,14 @@ export const LoginForm = () => {
       });
 
       if (result?.error) {
-        setError(result.error);
+        toast.error('Login failed. Please check your email and password.');
       } else {
+        toast.success('Login successful!');
         router.push('/quiz');
         router.refresh();
       }
     } catch {
-      setError('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -71,12 +71,6 @@ export const LoginForm = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
-        {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-            {error}
-          </div>
-        )}
-
         <div className="space-y-2">
           <Label htmlFor="email" className="text-base font-medium text-white">
             Email

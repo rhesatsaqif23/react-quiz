@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -34,7 +35,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const RegisterForm = () => {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,7 +48,6 @@ export const RegisterForm = () => {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setError(null);
     setIsLoading(true);
 
     try {
@@ -67,7 +66,7 @@ export const RegisterForm = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error || 'Registration failed');
+        toast.error(result.error || 'Registration failed');
         return;
       }
 
@@ -78,13 +77,14 @@ export const RegisterForm = () => {
       });
 
       if (signInResult?.error) {
-        setError('Registration successful but sign in failed. Please try logging in.');
+        toast.error('Registration successful but sign in failed. Please try logging in.');
       } else {
+        toast.success('Registration successful!');
         router.push('/quiz');
         router.refresh();
       }
     } catch {
-      setError('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -102,12 +102,6 @@ export const RegisterForm = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
-        {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-            {error}
-          </div>
-        )}
-
         <div className="space-y-2">
           <Label htmlFor="name" className="text-base font-medium text-white">
             Name
