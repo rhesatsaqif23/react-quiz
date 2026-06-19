@@ -67,14 +67,14 @@ export const LoginForm = () => {
       });
 
       if (result?.error) {
-        toast.error('Invalid email or password. Please check your credentials and try again.');
+        toast.error('Account not found. Please register first.');
       } else {
         toast.success('Welcome back! Redirecting to home...');
         router.push('/');
         router.refresh();
       }
     } catch {
-      toast.error('Unable to connect to server. Please check your internet connection and try again.');
+      toast.error('Account not found. Please register first.');
     } finally {
       setIsLoading(false);
     }
