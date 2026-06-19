@@ -40,33 +40,28 @@ export const QuizConfigForm = () => {
   };
 
   const handleStartQuiz = () => {
-    const params = new URLSearchParams();
-    params.set('amount', config.amount.toString());
-    if (config.category > 0) {
-      params.set('category', config.category.toString());
-    }
-    if (config.difficulty !== 'any') {
-      params.set('difficulty', config.difficulty);
-    }
-    if (config.type !== 'any') {
-      params.set('type', config.type);
-    }
-    router.push(`/quiz?${params.toString()}`);
+    localStorage.setItem('quizConfig', JSON.stringify(config));
+    localStorage.removeItem('quizState');
+    localStorage.removeItem('quizResults');
+    router.push('/quiz');
   };
 
-  const sliderIndex = QUIZ_AMOUNTS.indexOf(config.amount as typeof QUIZ_AMOUNTS[number]);
+  const sliderIndex = QUIZ_AMOUNTS.indexOf(config.amount as (typeof QUIZ_AMOUNTS)[number]);
 
   return (
     <Card className="w-full max-w-3xl">
       <CardHeader>
         <CardTitle className="text-2xl">Quiz Configuration</CardTitle>
-        <CardDescription className="text-base">Customize your quiz experience</CardDescription>
+        <CardDescription className="text-base">
+          Customize your quiz experience
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Number of Questions - Slider */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Label htmlFor="amount" className="text-base">Number of Questions</Label>
+            <Label htmlFor="amount" className="text-base">
+              Number of Questions
+            </Label>
             <span className="text-lg font-semibold">{config.amount}</span>
           </div>
           <Slider
@@ -84,9 +79,10 @@ export const QuizConfigForm = () => {
           </div>
         </div>
 
-        {/* Category - Select (>4 options) */}
         <div className="space-y-2">
-          <Label htmlFor="category" className="text-base">Select Category</Label>
+          <Label htmlFor="category" className="text-base">
+            Select Category
+          </Label>
           <Select
             value={config.category === 0 ? '' : config.category.toString()}
             onValueChange={handleCategoryChange}
@@ -108,7 +104,6 @@ export const QuizConfigForm = () => {
           </Select>
         </div>
 
-        {/* Difficulty - RadioGroup (4 options) */}
         <div className="space-y-3">
           <Label className="text-base">Select Difficulty</Label>
           <RadioGroup
@@ -135,7 +130,6 @@ export const QuizConfigForm = () => {
           </RadioGroup>
         </div>
 
-        {/* Type - RadioGroup (3 options) */}
         <div className="space-y-3">
           <Label className="text-base">Select Type</Label>
           <RadioGroup

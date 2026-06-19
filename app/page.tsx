@@ -14,7 +14,7 @@ export default function HomePage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [session, status, router]);
+  }, [status, router]);
 
   if (status === 'loading') {
     return (
@@ -29,7 +29,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6 md:p-8 lg:p-12">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 md:p-8 lg:p-12">
       <QuizConfigForm />
     </div>
   );

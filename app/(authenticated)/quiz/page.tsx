@@ -1,7 +1,7 @@
 'use client';
 
-import React, { Suspense, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,24 @@ import { QuizTimer } from './_components/quiz-timer';
 import { QuizProgress } from './_components/quiz-progress';
 
 const TIME_PER_QUESTION = 60;
+const STORAGE_KEY_QUIZ_STATE = 'quizState';
+const STORAGE_KEY_QUIZ_CONFIG = 'quizConfig';
+const STORAGE_KEY_QUIZ_RESULTS = 'quizResults';
+
+function getConfigFromStorage(): QuizConfig {
+  if (typeof window === 'undefined') {
+    return DEFAULT_QUIZ_CONFIG;
+  }
+  const saved = localStorage.getItem(STORAGE_KEY_QUIZ_CONFIG);
+  if (saved) {
+    try {
+      return JSON.parse(saved) as QuizConfig;
+    } catch {
+      localStorage.removeItem(STORAGE_KEY_QUIZ_CONFIG);
+    }
+  }
+  return DEFAULT_QUIZ_CONFIG;
+}
 
 function getInitialState(): QuizState {
   if (typeof window === 'undefined') {
@@ -26,21 +44,21 @@ function getInitialState(): QuizState {
     };
   }
 
-  const saved = localStorage.getItem('quizState');
+  const saved = localStorage.getItem(STORAGE_KEY_QUIZ_STATE);
   if (saved) {
     try {
       const parsed = JSON.parse(saved) as QuizState;
-      if (parsed.status === 'active') {
+      if (parsed.status === 'active' && parsed.questions.length > 0) {
         return parsed;
       }
     } catch {
-      localStorage.removeItem('quizState');
+      localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
     }
   }
 
   return {
     questions: [],
-    config: DEFAULT_QUIZ_CONFIG,
+    config: getConfigFromStorage(),
     currentIndex: 0,
     answers: {},
     timeRemaining: TIME_PER_QUESTION,
@@ -50,24 +68,17 @@ function getInitialState(): QuizState {
 
 function QuizContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { status } = useSession();
-
-  // Derive config from searchParams using useMemo
-  const config = useMemo<QuizConfig>(() => {
-    const amount = parseInt(searchParams.get('amount') || '10');
-    const category = parseInt(searchParams.get('category') || '0');
-    const difficulty = searchParams.get('difficulty') || 'any';
-    const type = searchParams.get('type') || 'any';
-    return { amount, category, difficulty, type };
-  }, [searchParams]);
 
   const [state, setState] = React.useState<QuizState>(getInitialState);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const fetchInitiated = React.useRef(false);
 
-  // Fetch questions
   const fetchQuestions = React.useCallback(async (quizConfig: QuizConfig) => {
+    if (fetchInitiated.current) return;
+    fetchInitiated.current = true;
+
     setIsLoading(true);
     setError(null);
     try {
@@ -83,9 +94,7 @@ function QuizContent() {
         params.set('type', quizConfig.type);
       }
 
-      const response = await fetch(
-        `https://opentdb.com/api.php?${params.toString()}`
-      );
+      const response = await fetch(`https://opentdb.com/api.php?${params.toString()}`);
       const data = await response.json();
 
       if (data.response_code !== 0) {
@@ -94,7 +103,11 @@ function QuizContent() {
 
       const questions = data.results.map(
         (q: Record<string, unknown>, index: number) => ({
-          ...decodeQuizQuestion(q as { question: string; correct_answer: string; incorrect_answers: string[] }),
+          ...decodeQuizQuestion(q as {
+            question: string;
+            correct_answer: string;
+            incorrect_answers: string[];
+          }),
           id: index,
           category: q.category as string,
           type: q.type as 'boolean' | 'multiple',
@@ -106,33 +119,34 @@ function QuizContent() {
         ...prev,
         questions,
         config: quizConfig,
+        currentIndex: 0,
+        answers: {},
+        timeRemaining: TIME_PER_QUESTION,
         status: 'active',
       }));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to load questions'
       );
+      fetchInitiated.current = false;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Start quiz when config changes and no questions loaded
   React.useEffect(() => {
-    if (state.status === 'idle' && state.questions.length === 0 && config.amount > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (state.status === 'idle' && state.questions.length === 0 && !fetchInitiated.current) {
+      const config = getConfigFromStorage();
       fetchQuestions(config);
     }
-  }, [state.status, state.questions.length, config, fetchQuestions]);
+  }, [state.status, state.questions.length, fetchQuestions]);
 
-  // Save state to localStorage
   React.useEffect(() => {
-    if (state.status === 'active') {
-      localStorage.setItem('quizState', JSON.stringify(state));
+    if (state.status === 'active' && state.questions.length > 0) {
+      localStorage.setItem(STORAGE_KEY_QUIZ_STATE, JSON.stringify(state));
     }
   }, [state]);
 
-  // Handle answer selection
   const handleAnswer = React.useCallback((answer: string) => {
     setState((prev) => {
       const newAnswers = {
@@ -143,7 +157,7 @@ function QuizContent() {
       const isLastQuestion = nextIndex >= prev.questions.length;
 
       if (isLastQuestion) {
-        localStorage.removeItem('quizState');
+        localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
         return {
           ...prev,
           answers: newAnswers,
@@ -160,19 +174,16 @@ function QuizContent() {
     });
   }, []);
 
-  // Handle timer expiry
   const handleTimeUp = React.useCallback(() => {
     setState((prev) => ({
       ...prev,
       status: 'timeout',
     }));
-    localStorage.removeItem('quizState');
+    localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
   }, []);
 
-  // Redirect to results when quiz is completed or timed out
   React.useEffect(() => {
     if (state.status === 'completed' || state.status === 'timeout') {
-      // Calculate and save results
       let correct = 0;
       let answered = 0;
       Object.entries(state.answers).forEach(([index, answer]) => {
@@ -181,15 +192,19 @@ function QuizContent() {
           correct++;
         }
       });
+
+      const totalTimeTaken =
+        state.currentIndex * TIME_PER_QUESTION + (TIME_PER_QUESTION - state.timeRemaining);
+
       const results = {
         totalQuestions: state.questions.length,
         answeredQuestions: answered,
         correctAnswers: correct,
         incorrectAnswers: answered - correct,
-        score: Math.round((correct / state.questions.length) * 100),
-        timeTaken: (state.questions.length - 1) * TIME_PER_QUESTION + (TIME_PER_QUESTION - state.timeRemaining),
+        score: state.questions.length > 0 ? Math.round((correct / state.questions.length) * 100) : 0,
+        timeTaken: totalTimeTaken,
       };
-      localStorage.setItem('quizResults', JSON.stringify(results));
+      localStorage.setItem(STORAGE_KEY_QUIZ_RESULTS, JSON.stringify(results));
       router.push('/results');
     }
   }, [state, router]);
@@ -202,7 +217,7 @@ function QuizContent() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-3xl">
           <CardContent className="flex items-center justify-center p-8">
             <p>Loading questions...</p>
           </CardContent>
@@ -214,28 +229,41 @@ function QuizContent() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-3xl">
           <CardHeader>
             <CardTitle>Error</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-destructive">{error}</p>
-            <Button onClick={() => router.push('/')}>Go Back</Button>
+            <div className="flex gap-4">
+              <Button onClick={() => {
+                fetchInitiated.current = false;
+                setError(null);
+                const config = getConfigFromStorage();
+                fetchQuestions(config);
+              }}>
+                Try Again
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/')}>
+                Go Back
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (state.questions.length === 0) {
+  if (state.questions.length === 0 || !state.questions[state.currentIndex]) {
     return null;
   }
 
   const currentQuestion = state.questions[state.currentIndex];
+  const answeredCount = Object.keys(state.answers).length;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="w-full max-w-3xl space-y-6">
         <QuizTimer
           timeRemaining={state.timeRemaining}
           totalTime={TIME_PER_QUESTION}
@@ -244,7 +272,7 @@ function QuizContent() {
         <QuizProgress
           currentQuestion={state.currentIndex + 1}
           totalQuestions={state.questions.length}
-          answeredQuestions={Object.keys(state.answers).length}
+          answeredQuestions={answeredCount}
         />
         <QuestionCard
           question={currentQuestion}
