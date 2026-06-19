@@ -26,11 +26,11 @@ export default function HomePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const isAuthenticated = status === 'authenticated';
-  const [hasResume, setHasResume] = useState(false);
-
-  React.useEffect(() => {
-    setHasResume(hasActiveQuiz());
-  }, []);
+  const hasResume = React.useSyncExternalStore(
+    () => () => {},
+    () => hasActiveQuiz(),
+    () => false,
+  );
 
   const handleStartQuiz = () => {
     if (!isAuthenticated) {
