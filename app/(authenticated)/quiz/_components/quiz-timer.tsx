@@ -2,10 +2,14 @@
 
 import React from 'react';
 
-interface QuizTimerProps {
-  startedAt: number;
-  totalQuestions: number;
+interface QuestionTimerProps {
+  questionStartedAt: number;
   onTimeout: () => void;
+}
+
+interface GlobalTimerProps {
+  quizStartedAt: number;
+  totalQuestions: number;
 }
 
 function formatTime(totalSeconds: number): { mins: string; secs: string } {
@@ -17,15 +21,16 @@ function formatTime(totalSeconds: number): { mins: string; secs: string } {
   };
 }
 
-export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt, totalQuestions, onTimeout }) => {
-  const totalDuration = totalQuestions * 30;
-  const [remaining, setRemaining] = React.useState(totalDuration);
+const QUESTION_DURATION = 30;
+
+function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps) {
+  const [remaining, setRemaining] = React.useState(QUESTION_DURATION);
   const hasTimedOut = React.useRef(false);
 
   React.useEffect(() => {
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      const left = Math.max(0, totalDuration - elapsed);
+      const elapsed = Math.floor((Date.now() - questionStartedAt) / 1000);
+      const left = Math.max(0, QUESTION_DURATION - elapsed);
       setRemaining(left);
 
       if (left <= 0 && !hasTimedOut.current) {
@@ -37,10 +42,10 @@ export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt, totalQuestions,
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [startedAt, totalDuration, onTimeout]);
+  }, [questionStartedAt, onTimeout]);
 
   const { mins, secs } = formatTime(remaining);
-  const isLow = remaining <= 30;
+  const isLow = remaining <= 10;
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -63,6 +68,53 @@ export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt, totalQuestions,
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+export const QuestionTimer: React.FC<QuestionTimerProps> = (props) => (
+  <QuestionTimerInner key={props.questionStartedAt} {...props} />
+);
+
+export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQuestions }) => {
+  const totalDuration = totalQuestions * 30;
+  const [remaining, setRemaining] = React.useState(totalDuration);
+
+  React.useEffect(() => {
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - quizStartedAt) / 1000);
+      const left = Math.max(0, totalDuration - elapsed);
+      setRemaining(left);
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [quizStartedAt, totalDuration]);
+
+  const { mins, secs } = formatTime(remaining);
+  const isLow = remaining <= 60;
+
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+      <span className={`tabular-nums font-medium ${isLow ? 'text-destructive' : ''}`}>
+        {mins}:{secs}
+      </span>
+      <span>remaining</span>
     </div>
   );
 };

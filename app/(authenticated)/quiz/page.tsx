@@ -8,7 +8,7 @@ import { DEFAULT_QUIZ_CONFIG } from '@/common/constants/trivia-categories';
 import { decodeQuizQuestion } from '@/utils/decode-html';
 import { Navbar } from '@/components/navbar';
 import { QuestionCard } from './_components/question-card';
-import { QuizTimer } from './_components/quiz-timer';
+import { QuestionTimer, GlobalTimer } from './_components/quiz-timer';
 import { QuizProgress } from './_components/quiz-progress';
 
 const STORAGE_KEY_QUIZ_STATE = 'quizState';
@@ -69,6 +69,7 @@ function QuizContent() {
   const { status } = useSession();
 
   const [state, setState] = React.useState<QuizState>(getInitialState);
+  const [questionStartedAt, setQuestionStartedAt] = React.useState(() => Date.now());
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const fetchInitiated = React.useRef(false);
@@ -113,15 +114,17 @@ function QuizContent() {
         })
       );
 
+      const now = Date.now();
       setState((prev) => ({
         ...prev,
         questions,
         config: quizConfig,
         currentIndex: 0,
         answers: {},
-        startedAt: Date.now(),
+        startedAt: now,
         status: 'active',
       }));
+      setQuestionStartedAt(now);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to load questions'
@@ -192,14 +195,23 @@ function QuizContent() {
 
       return { ...prev, answers: newAnswers, currentIndex: nextIndex };
     });
+    setQuestionStartedAt(Date.now());
   }, [completeQuiz]);
 
-  const handleTimeout = React.useCallback(() => {
+  const handleQuestionTimeout = React.useCallback(() => {
     setState((prev) => {
       if (prev.status !== 'active') return prev;
-      setTimeout(() => completeQuiz(prev), 300);
-      return { ...prev, status: 'timeout' };
+      const nextIndex = prev.currentIndex + 1;
+
+      if (nextIndex >= prev.questions.length) {
+        const completedState = { ...prev, status: 'timeout' as const };
+        setTimeout(() => completeQuiz(completedState), 300);
+        return { ...prev, status: 'timeout' as const };
+      }
+
+      return { ...prev, currentIndex: nextIndex };
     });
+    setQuestionStartedAt(Date.now());
   }, [completeQuiz]);
 
   if (status === 'unauthenticated') {
@@ -270,7 +282,7 @@ function QuizContent() {
           answeredQuestions={answeredCount}
         />
 
-        <QuizTimer startedAt={state.startedAt} totalQuestions={state.questions.length} onTimeout={handleTimeout} />
+        <QuestionTimer questionStartedAt={questionStartedAt} onTimeout={handleQuestionTimeout} />
 
         <QuestionCard
           question={currentQuestion}
@@ -279,6 +291,8 @@ function QuizContent() {
           onAnswer={handleAnswer}
           selectedAnswer={state.answers[state.currentIndex]}
         />
+
+        <GlobalTimer quizStartedAt={state.startedAt} totalQuestions={state.questions.length} />
       </div>
     </div>
   );
