@@ -34,20 +34,8 @@ export const QuizConfigForm = () => {
   };
 
   const handleCategoryChange = (value: string | null) => {
-    if (value) {
+    if (value !== null) {
       setConfig((prev) => ({ ...prev, category: parseInt(value) }));
-    }
-  };
-
-  const handleDifficultyChange = (value: string | null) => {
-    if (value) {
-      setConfig((prev) => ({ ...prev, difficulty: value }));
-    }
-  };
-
-  const handleTypeChange = (value: string | null) => {
-    if (value) {
-      setConfig((prev) => ({ ...prev, type: value }));
     }
   };
 
@@ -100,11 +88,13 @@ export const QuizConfigForm = () => {
         <div className="space-y-2">
           <Label htmlFor="category" className="text-base">Select Category</Label>
           <Select
-            value={config.category.toString()}
+            value={config.category === 0 ? '' : config.category.toString()}
             onValueChange={handleCategoryChange}
           >
             <SelectTrigger id="category" className="w-full">
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder="Any Category">
+                {TRIVIA_CATEGORIES.find((c) => c.id === config.category)?.name ?? 'Any Category'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -123,7 +113,9 @@ export const QuizConfigForm = () => {
           <Label className="text-base">Select Difficulty</Label>
           <RadioGroup
             value={config.difficulty}
-            onValueChange={handleDifficultyChange}
+            onValueChange={(val: string | null) => {
+              setConfig((prev) => ({ ...prev, difficulty: val ?? 'any' }));
+            }}
             className="grid grid-cols-2 gap-3"
           >
             {QUIZ_DIFFICULTIES.map((item) => (
@@ -148,7 +140,9 @@ export const QuizConfigForm = () => {
           <Label className="text-base">Select Type</Label>
           <RadioGroup
             value={config.type}
-            onValueChange={handleTypeChange}
+            onValueChange={(val: string | null) => {
+              setConfig((prev) => ({ ...prev, type: val ?? 'any' }));
+            }}
             className="grid grid-cols-3 gap-3"
           >
             {QUIZ_TYPES.map((item) => (
