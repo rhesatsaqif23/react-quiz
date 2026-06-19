@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -22,12 +23,14 @@ export const Navbar = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" fill="currentColor" className="text-primary" />
-              <path d="M12 6v6l4 2" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
+          <Image
+            src="/quiztime-icon.png"
+            alt="QuizTime Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full"
+            priority
+          />
           <span className="text-xl font-bold tracking-wide text-white light:text-black">
             QUIZ TIME
           </span>

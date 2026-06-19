@@ -14,6 +14,9 @@ const jost = Jost({
 export const metadata: Metadata = {
   title: 'React Quiz App',
   description: 'A quiz application built with Next.js and NextAuth',
+  icons: {
+    icon: '/quiztime-icon.png',
+  },
 };
 
 export default function RootLayout({
