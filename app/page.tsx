@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { useSession } from 'next-auth/react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/navbar';
 import { QuizConfigDialog } from './(public)/_components/quiz-config-dialog';
 
@@ -12,23 +11,15 @@ export default function HomePage() {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
+  const isAuthenticated = status === 'authenticated';
+
+  const handleStartTest = () => {
+    if (!isAuthenticated) {
       router.push('/login');
+      return;
     }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!status) {
-    return null;
-  }
+    setDialogOpen(true);
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-black dark:bg-black light:bg-gray-100">
@@ -51,7 +42,7 @@ export default function HomePage() {
         </p>
         <div className="mt-16">
           <button
-            onClick={() => setDialogOpen(true)}
+            onClick={handleStartTest}
             className="group rounded-full border border-primary/40 bg-grey/10 px-10 py-3 text-lg font-bold text-primary backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_30px_rgba(179,255,0,0.4)] sm:px-12 sm:py-5 sm:text-xl"
           >
             Start Test

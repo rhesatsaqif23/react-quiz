@@ -49,7 +49,7 @@ export const LoginForm = () => {
         toast.error('Login failed. Please check your email and password.');
       } else {
         toast.success('Login successful!');
-        router.push('/quiz');
+        router.push('/');
         router.refresh();
       }
     } catch {

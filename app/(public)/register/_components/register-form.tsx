@@ -80,7 +80,7 @@ export const RegisterForm = () => {
         toast.error('Registration successful but sign in failed. Please try logging in.');
       } else {
         toast.success('Registration successful!');
-        router.push('/quiz');
+        router.push('/');
         router.refresh();
       }
     } catch {
