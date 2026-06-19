@@ -17,7 +17,7 @@ export const QuizProgress: React.FC<QuizProgressProps> = ({
       <span className="text-lg font-bold tracking-wide text-foreground sm:text-xl">
         Questions: {currentQuestion} out of {totalQuestions}
       </span>
-      <div className="h-0.5 w-full max-w-[200px] bg-primary/60" />
+      <div className="h-1 w-full max-w-[200px] bg-primary/60" />
     </div>
   );
 };

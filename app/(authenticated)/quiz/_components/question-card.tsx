@@ -45,7 +45,7 @@ export const QuestionCard = React.memo(({
                 className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-base font-bold sm:h-13 sm:w-13 sm:text-lg ${
                   isSelected
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-white dark:bg-black text-foreground border border-foreground/20'
+                    : 'bg-black dark:bg-white text-white dark:text-black border border-foreground/20'
                 }`}
               >
                 {letter}

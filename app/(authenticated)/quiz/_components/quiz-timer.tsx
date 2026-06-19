@@ -39,11 +39,11 @@ function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex items-baseline gap-1">
+      <div className="flex flex-col items-center">
         <span className={`text-6xl font-bold tabular-nums tracking-widest sm:text-7xl md:text-8xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
           {remaining}
         </span>
-        <span className={`text-lg font-medium sm:text-xl ${isLow ? 'text-destructive' : 'text-muted-foreground'}`}>
+        <span className={`text-xl font-medium sm:text-2xl ${isLow ? 'text-destructive' : 'text-muted-foreground'}`}>
           sec
         </span>
       </div>
