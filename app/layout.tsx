@@ -12,10 +12,14 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: 'React Quiz App',
-  description: 'A quiz application built with Next.js and NextAuth',
+  title: 'QuizTime',
+  description: 'Test your knowledge with timed quizzes',
   icons: {
-    icon: '/quiztime-icon.png',
+    icon: [
+      { url: '/quiztime-icon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/quiztime-icon.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/quiztime-icon.png',
   },
 };
 

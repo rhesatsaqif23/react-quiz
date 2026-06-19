@@ -4,9 +4,11 @@ import React from 'react';
 
 interface QuizTimerProps {
   startedAt: number;
+  totalQuestions: number;
+  onTimeout: () => void;
 }
 
-function formatElapsed(totalSeconds: number): { mins: string; secs: string } {
+function formatTime(totalSeconds: number): { mins: string; secs: string } {
   const mins = Math.floor(totalSeconds / 60);
   const secs = totalSeconds % 60;
   return {
@@ -15,37 +17,48 @@ function formatElapsed(totalSeconds: number): { mins: string; secs: string } {
   };
 }
 
-export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt }) => {
-  const [elapsed, setElapsed] = React.useState(0);
+export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt, totalQuestions, onTimeout }) => {
+  const totalDuration = totalQuestions * 60;
+  const [remaining, setRemaining] = React.useState(totalDuration);
+  const hasTimedOut = React.useRef(false);
 
   React.useEffect(() => {
     const tick = () => {
-      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const left = Math.max(0, totalDuration - elapsed);
+      setRemaining(left);
+
+      if (left <= 0 && !hasTimedOut.current) {
+        hasTimedOut.current = true;
+        onTimeout();
+      }
     };
+
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [startedAt]);
+  }, [startedAt, totalDuration, onTimeout]);
 
-  const { mins, secs } = formatElapsed(elapsed);
+  const { mins, secs } = formatTime(remaining);
+  const isLow = remaining <= 30;
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="flex items-center gap-3">
         <div className="flex flex-col items-center">
-          <span className="text-5xl font-bold tabular-nums tracking-widest text-white sm:text-6xl md:text-7xl">
+          <span className={`text-5xl font-bold tabular-nums tracking-widest sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
             {mins}
           </span>
-          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-white/60">
+          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Minutes
           </span>
         </div>
-        <span className="text-5xl font-bold text-white/30 sm:text-6xl md:text-7xl">:</span>
+        <span className={`text-5xl font-bold sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-muted-foreground'}`}>:</span>
         <div className="flex flex-col items-center">
-          <span className="text-5xl font-bold tabular-nums tracking-widest text-white sm:text-6xl md:text-7xl">
+          <span className={`text-5xl font-bold tabular-nums tracking-widest sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
             {secs}
           </span>
-          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-white/60">
+          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Seconds
           </span>
         </div>

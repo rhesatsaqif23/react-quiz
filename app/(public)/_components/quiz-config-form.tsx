@@ -51,10 +51,10 @@ export const QuizConfigForm = () => {
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <Label htmlFor="amount" className="text-sm font-medium">
+          <Label htmlFor="amount" className="text-base font-semibold">
             Number of Questions
           </Label>
-          <span className="text-lg font-semibold">{config.amount}</span>
+          <span className="text-xl font-bold">{config.amount}</span>
         </div>
         <Slider
           id="amount"
@@ -65,7 +65,7 @@ export const QuizConfigForm = () => {
           onValueChange={handleAmountChange}
           className="w-full"
         />
-        <div className="flex justify-between text-xs text-muted-foreground px-1">
+        <div className="flex justify-between text-sm text-muted-foreground px-1">
           {QUIZ_AMOUNTS.map((amount) => (
             <span key={amount} className="text-center w-0">
               {amount}
@@ -75,14 +75,14 @@ export const QuizConfigForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category" className="text-sm font-medium">
+        <Label htmlFor="category" className="text-base font-semibold">
           Select Category
         </Label>
         <Select
           value={config.category === 0 ? '' : config.category.toString()}
           onValueChange={handleCategoryChange}
         >
-          <SelectTrigger id="category" className="w-full py-6 text-base">
+          <SelectTrigger id="category" className="w-full py-6 text-lg">
             <SelectValue placeholder="Any Category">
               {TRIVIA_CATEGORIES.find((c) => c.id === config.category)?.name ?? 'Any Category'}
             </SelectValue>
@@ -100,7 +100,7 @@ export const QuizConfigForm = () => {
       </div>
 
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Select Difficulty</Label>
+        <Label className="text-base font-semibold">Select Difficulty</Label>
         <RadioGroup
           value={config.difficulty}
           onValueChange={(val: string | null) => {
@@ -116,7 +116,7 @@ export const QuizConfigForm = () => {
               <RadioGroupItem value={item.value} id={`difficulty-${item.value}`} />
               <Label
                 htmlFor={`difficulty-${item.value}`}
-                className="cursor-pointer font-normal"
+                className="cursor-pointer font-normal text-base"
               >
                 {item.label}
               </Label>
@@ -126,7 +126,7 @@ export const QuizConfigForm = () => {
       </div>
 
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Select Type</Label>
+        <Label className="text-base font-semibold">Select Type</Label>
         <RadioGroup
           value={config.type}
           onValueChange={(val: string | null) => {
@@ -142,7 +142,7 @@ export const QuizConfigForm = () => {
               <RadioGroupItem value={item.value} id={`type-${item.value}`} />
               <Label
                 htmlFor={`type-${item.value}`}
-                className="cursor-pointer font-normal"
+                className="cursor-pointer font-normal text-base"
               >
                 {item.label}
               </Label>

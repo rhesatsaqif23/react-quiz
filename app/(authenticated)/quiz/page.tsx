@@ -175,6 +175,14 @@ function QuizContent() {
     setState((prev) => ({ ...prev, status: 'completed' }));
   }, []);
 
+  const handleTimeout = React.useCallback(() => {
+    setState((prev) => {
+      if (prev.status !== 'active') return prev;
+      localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
+      return { ...prev, status: 'timeout' };
+    });
+  }, []);
+
   React.useEffect(() => {
     if (state.status === 'completed' || state.status === 'timeout') {
       let correct = 0;
@@ -208,16 +216,16 @@ function QuizContent() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <p className="text-lg text-white/60">Loading questions...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-lg text-muted-foreground">Loading questions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-black p-4">
-        <p className="mb-4 text-lg text-red-400">{error}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <p className="mb-4 text-lg text-destructive">{error}</p>
         <div className="flex gap-4">
           <button
             onClick={() => {
@@ -226,13 +234,13 @@ function QuizContent() {
               const config = getConfigFromStorage();
               fetchQuestions(config);
             }}
-            className="rounded-lg bg-white/10 px-6 py-3 text-sm font-medium text-white hover:bg-white/20"
+            className="rounded-lg bg-muted px-6 py-3 text-sm font-medium text-foreground hover:bg-muted/80"
           >
             Try Again
           </button>
           <button
             onClick={() => router.push('/')}
-            className="rounded-lg border border-white/20 px-6 py-3 text-sm font-medium text-white/70 hover:bg-white/10"
+            className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Go Back
           </button>
@@ -253,26 +261,27 @@ function QuizContent() {
   const allAnswered = answeredCount === state.questions.length;
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-800" />
-      <div className="absolute top-20 left-32 h-72 w-72 rotate-12 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl blur-sm sm:h-96 sm:w-40" />
-      <div className="absolute top-40 left-48 h-64 w-48 -rotate-12 bg-gradient-to-b from-zinc-600/30 to-zinc-800/50 shadow-xl sm:left-64 sm:h-80 sm:w-32" />
-      <div className="absolute right-32 bottom-40 h-56 w-56 rotate-45 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl sm:right-48 sm:h-72 sm:w-28" />
-      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-b from-transparent via-transparent to-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted" />
+      <div className="animate-float1 absolute top-20 left-32 h-72 w-72 rotate-12 bg-gradient-to-br from-muted/40 to-muted/60 shadow-2xl blur-sm sm:h-96 sm:w-40" />
+      <div className="animate-float2 absolute top-40 left-48 h-64 w-48 -rotate-12 bg-gradient-to-b from-muted/30 to-muted/50 shadow-xl sm:left-64 sm:h-80 sm:w-32" />
+      <div className="animate-float3 absolute right-32 bottom-40 h-56 w-56 rotate-45 bg-gradient-to-br from-muted/40 to-muted/60 shadow-2xl sm:right-48 sm:h-72 sm:w-28" />
+      <div className="animate-shine absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-b from-transparent via-transparent to-background/50" />
 
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10 pt-24 sm:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-20 pb-10 pt-24 sm:px-24">
         <QuizProgress
           currentQuestion={state.currentIndex + 1}
           totalQuestions={state.questions.length}
           answeredQuestions={answeredCount}
         />
 
-        <QuizTimer startedAt={state.startedAt} />
+        <QuizTimer startedAt={state.startedAt} totalQuestions={state.questions.length} onTimeout={handleTimeout} />
 
         <QuestionCard
           question={currentQuestion}
@@ -282,17 +291,38 @@ function QuizContent() {
           selectedAnswer={state.answers[state.currentIndex]}
         />
 
-        {/* Navigation */}
-        <div className="flex w-full max-w-lg items-center justify-between gap-4">
+        {/* Prev Button - fixed left */}
+        <button
+          onClick={handlePrev}
+          disabled={isFirst}
+          className="fixed left-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-black transition-all hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-30 dark:bg-black dark:text-white dark:hover:bg-black/80"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+
+        {/* Next Button - fixed right */}
+        {!isLast && (
           <button
-            onClick={handlePrev}
-            disabled={isFirst}
-            className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/5 text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+            onClick={handleNext}
+            disabled={!hasAnsweredCurrent}
+            className="fixed right-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-black transition-all hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-30 dark:bg-black dark:text-white dark:hover:bg-black/80"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
+              width="24"
+              height="24"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -300,40 +330,23 @@ function QuizContent() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="m15 18-6-6 6-6" />
+              <path d="m9 18 6-6-6-6" />
             </svg>
           </button>
+        )}
 
-          {isLast ? (
+        {/* Submit Button - centered bottom */}
+        {isLast && (
+          <div className="w-full max-w-lg pt-2">
             <button
               onClick={handleSubmit}
               disabled={!allAnswered}
-              className="flex-1 rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(179,255,0,0.3)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:shadow-none"
+              className="w-full rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(179,255,0,0.3)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:shadow-none"
             >
               Submit Quiz
             </button>
-          ) : (
-            <button
-              onClick={handleNext}
-              disabled={!hasAnsweredCurrent}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/5 text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -343,8 +356,8 @@ export default function QuizPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-black">
-          <p className="text-lg text-white/60">Loading...</p>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <p className="text-lg text-muted-foreground">Loading...</p>
         </div>
       }
     >

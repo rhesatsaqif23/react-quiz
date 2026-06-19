@@ -129,3 +129,40 @@
     @apply font-sans;
   }
 }
+
+/* Password bullet masking */
+input[type="password"] {
+  font-family: "text-security-disc", "Arial Unicode Ms", sans-serif;
+  letter-spacing: 0.1em;
+}
+
+/* Animated 3D Background Shapes */
+@keyframes float1 {
+  0%, 100% { transform: rotate(12deg) translateY(0px); }
+  50% { transform: rotate(12deg) translateY(-20px); }
+}
+@keyframes float2 {
+  0%, 100% { transform: rotate(-12deg) translateX(0px); }
+  50% { transform: rotate(-12deg) translateX(15px); }
+}
+@keyframes float3 {
+  0%, 100% { transform: rotate(45deg) scale(1); }
+  50% { transform: rotate(45deg) scale(1.05); }
+}
+@keyframes shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.animate-float1 { animation: float1 8s ease-in-out infinite; }
+.animate-float2 { animation: float2 10s ease-in-out infinite; }
+.animate-float3 { animation: float3 12s ease-in-out infinite; }
+.animate-shine {
+  background-size: 200% 100%;
+  animation: shine 6s ease-in-out infinite;
+}
+.animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }

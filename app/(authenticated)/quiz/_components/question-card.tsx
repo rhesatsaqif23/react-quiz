@@ -20,8 +20,8 @@ export const QuestionCard = React.memo(({
 }: QuestionCardProps) => {
   return (
     <div className="w-full space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-white/10 px-6 py-5 backdrop-blur-sm">
-        <p className="text-center text-lg font-medium text-white sm:text-xl md:text-2xl">
+      <div className="rounded-2xl border border-border bg-card/50 px-6 py-6 backdrop-blur-sm">
+        <p className="text-center text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
           {question.question}
         </p>
       </div>
@@ -35,24 +35,24 @@ export const QuestionCard = React.memo(({
             <button
               key={answer}
               onClick={() => onAnswer(answer)}
-              className={`group flex w-full items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all sm:px-6 sm:py-5 ${
+              className={`group flex w-full items-center gap-4 rounded-xl border px-6 py-5 text-left transition-all sm:px-7 sm:py-6 ${
                 isSelected
                   ? 'border-primary bg-primary/15 shadow-[0_0_20px_rgba(179,255,0,0.15)]'
-                  : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                  : 'border-foreground/20 bg-white dark:bg-black hover:border-foreground/40 hover:bg-foreground/5'
               }`}
             >
               <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-base font-bold sm:h-12 sm:w-12 sm:text-lg ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-base font-bold sm:h-13 sm:w-13 sm:text-lg ${
                   isSelected
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-white/10 text-white/60 group-hover:bg-white/20 group-hover:text-white'
+                    : 'bg-white dark:bg-black text-foreground border border-foreground/20'
                 }`}
               >
                 {letter}
               </span>
               <span
-                className={`text-base font-medium sm:text-lg ${
-                  isSelected ? 'text-primary' : 'text-white'
+                className={`text-lg font-medium sm:text-xl ${
+                  isSelected ? 'text-primary' : 'text-foreground'
                 }`}
               >
                 {answer}

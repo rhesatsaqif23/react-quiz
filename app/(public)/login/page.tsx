@@ -19,8 +19,8 @@ export default function LoginPage() {
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <p className="text-lg text-white/60">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-lg text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -30,15 +30,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
       <Navbar />
 
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-800" />
-      <div className="absolute top-20 left-32 h-72 w-72 rotate-12 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl blur-sm sm:h-96 sm:w-40" />
-      <div className="absolute top-40 left-48 h-64 w-48 -rotate-12 bg-gradient-to-b from-zinc-600/30 to-zinc-800/50 shadow-xl sm:left-64 sm:h-80 sm:w-32" />
-      <div className="absolute right-32 bottom-40 h-56 w-56 rotate-45 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl sm:right-48 sm:h-72 sm:w-28" />
-      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-b from-transparent via-transparent to-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted" />
+      <div className="animate-float1 absolute top-20 left-32 h-72 w-72 rotate-12 bg-gradient-to-br from-muted/40 to-muted/60 shadow-2xl blur-sm sm:h-96 sm:w-40" />
+      <div className="animate-float2 absolute top-40 left-48 h-64 w-48 -rotate-12 bg-gradient-to-b from-muted/30 to-muted/50 shadow-xl sm:left-64 sm:h-80 sm:w-32" />
+      <div className="animate-float3 absolute right-32 bottom-40 h-56 w-56 rotate-45 bg-gradient-to-br from-muted/40 to-muted/60 shadow-2xl sm:right-48 sm:h-72 sm:w-28" />
+      <div className="animate-shine absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-b from-transparent via-transparent to-background/50" />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-20">
         <LoginForm />

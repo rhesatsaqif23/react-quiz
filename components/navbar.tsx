@@ -19,7 +19,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/40 backdrop-blur-xl dark:bg-black/40 light:bg-white/60 light:border-black/10">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
@@ -31,8 +31,8 @@ export const Navbar = () => {
             className="h-10 w-10 rounded-full"
             priority
           />
-          <span className="text-xl font-bold tracking-wide text-white light:text-black">
-            QUIZ TIME
+          <span className="text-xl md:text-2xl font-bold tracking-wide text-foreground">
+            QUIZTIME
           </span>
         </Link>
 
@@ -40,12 +40,12 @@ export const Navbar = () => {
         <div className="flex items-center gap-4">
           {isLoading ? null : isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <span className="hidden text-base font-semibold text-white light:text-black sm:block">
+              <span className="hidden text-base font-semibold text-foreground sm:block">
                 {session?.user?.name ?? session?.user?.email ?? 'User'}
               </span>
               <button
                 onClick={handleLogout}
-                className="rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 light:border-black/20 light:bg-black/10 light:text-black light:hover:bg-black/20"
+                className="rounded-full border border-border bg-muted px-5 py-2 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted/80"
               >
                 Logout
               </button>
@@ -54,7 +54,7 @@ export const Navbar = () => {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 light:border-black/20 light:bg-black/10 light:text-black light:hover:bg-black/20"
+                className="rounded-full border border-border bg-muted px-5 py-2 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-muted/80"
               >
                 Login
               </Link>
