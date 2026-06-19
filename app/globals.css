@@ -130,12 +130,6 @@
   }
 }
 
-/* Password bullet masking */
-input[type="password"] {
-  font-family: "text-security-disc", "Arial Unicode Ms", sans-serif;
-  letter-spacing: 0.1em;
-}
-
 /* Animated 3D Background Shapes */
 @keyframes float1 {
   0%, 100% { transform: rotate(12deg) translateY(0px); }
