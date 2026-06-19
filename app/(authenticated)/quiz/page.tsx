@@ -189,13 +189,17 @@ function QuizContent() {
 
       if (nextIndex >= prev.questions.length) {
         const completedState = { ...prev, answers: newAnswers, status: 'completed' as const };
-        setTimeout(() => completeQuiz(completedState), 300);
+        setTimeout(() => completeQuiz(completedState), 1000);
         return { ...prev, answers: newAnswers, status: 'completed' as const };
       }
 
-      return { ...prev, answers: newAnswers, currentIndex: nextIndex };
+      setTimeout(() => {
+        setState((s) => ({ ...s, currentIndex: nextIndex }));
+        setQuestionStartedAt(Date.now());
+      }, 1000);
+
+      return { ...prev, answers: newAnswers };
     });
-    setQuestionStartedAt(Date.now());
   }, [completeQuiz]);
 
   const handleQuestionTimeout = React.useCallback(() => {

@@ -96,11 +96,11 @@ export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQu
   const isLow = remaining <= 60;
 
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <div className="flex items-center gap-2 text-lg sm:text-xl text-muted-foreground">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="14"
-        height="14"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -111,10 +111,10 @@ export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQu
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>
-      <span className={`tabular-nums font-medium ${isLow ? 'text-destructive' : ''}`}>
+      <span className={`tabular-nums font-semibold ${isLow ? 'text-destructive' : ''}`}>
         {mins}:{secs}
       </span>
-      <span>remaining</span>
+      <span className="text-muted-foreground/80">remaining</span>
     </div>
   );
 };

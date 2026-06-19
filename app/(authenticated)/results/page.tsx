@@ -31,43 +31,41 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 function QuestionResultCard({ result, index }: { result: QuestionResult; index: number }) {
   return (
-    <div className={`rounded-xl border p-5 backdrop-blur-sm ${
-      result.isCorrect
+    <div className={`rounded-xl border p-6 backdrop-blur-sm ${result.isCorrect
         ? 'border-green-500/30 bg-green-500/10'
         : 'border-red-500/30 bg-red-500/10'
-    }`}>
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
-          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
-            result.isCorrect
+      }`}>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base font-bold ${result.isCorrect
               ? 'bg-green-500 text-white'
               : 'bg-red-500 text-white'
-          }`}>
+            }`}>
             {index + 1}
           </span>
-          <span className="text-sm text-muted-foreground">{result.category}</span>
-          <span className={`text-xs font-medium ${DIFFICULTY_COLORS[result.difficulty] ?? 'text-muted-foreground'}`}>
+          <span className="text-base text-foreground/70">{result.category}</span>
+          <span className={`text-sm font-medium ${DIFFICULTY_COLORS[result.difficulty] ?? 'text-foreground/70'}`}>
             {result.difficulty}
           </span>
         </div>
-        <span className={`text-sm font-semibold ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+        <span className={`text-base font-semibold ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
           {result.isCorrect ? 'Correct' : result.userAnswer === null ? 'Skipped' : 'Incorrect'}
         </span>
       </div>
 
-      <p className="text-base font-medium text-foreground mb-3">{result.question}</p>
+      <p className="text-lg sm:text-xl font-medium text-foreground mb-4">{result.question}</p>
 
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Your answer:</span>
-          <span className={`text-sm font-medium ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+          <span className="text-base text-foreground/70">Your answer:</span>
+          <span className={`text-base font-medium ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
             {result.userAnswer ?? 'No answer'}
           </span>
         </div>
         {!result.isCorrect && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Correct answer:</span>
-            <span className="text-sm font-medium text-green-500">{result.correctAnswer}</span>
+            <span className="text-base text-foreground/70">Correct answer:</span>
+            <span className="text-base font-medium text-green-500">{result.correctAnswer}</span>
           </div>
         )}
       </div>
@@ -194,7 +192,7 @@ export default function ResultsPage() {
 
           {/* Time */}
           <div className="rounded-xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
-            <p className="text-muted-foreground">
+            <p className="text-base md:text-lg text-muted-foreground">
               Time taken:{' '}
               <span className="font-semibold text-foreground">{formatTime(results.timeTaken)}</span>
             </p>
@@ -203,7 +201,7 @@ export default function ResultsPage() {
           {/* Per-Question Results */}
           {results.questionResults && results.questionResults.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Question Review</h2>
+              <h2 className="text-2xl font-bold text-foreground">Quiz Review</h2>
               <div className="space-y-4">
                 {results.questionResults.map((result, index) => (
                   <QuestionResultCard key={index} result={result} index={index} />
@@ -217,7 +215,7 @@ export default function ResultsPage() {
             onClick={handleRestart}
             className="w-full rounded-xl bg-primary py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
           >
-            Restart Quiz
+            Back to Home
           </button>
         </div>
       </div>
