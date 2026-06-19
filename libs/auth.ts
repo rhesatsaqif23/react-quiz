@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Validate credentials and return user object or null
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error('Please provide email and password');
         }
 
         const user = await db.user.findUnique({
@@ -44,7 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!user) {
-          return null;
+          throw new Error('Account not found. Please register first.');
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -53,7 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error('Invalid password. Please try again.');
         }
 
         return {
