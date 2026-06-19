@@ -32,19 +32,19 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 function QuestionResultCard({ result, index }: { result: QuestionResult; index: number }) {
   return (
     <div className={`rounded-xl border p-6 backdrop-blur-sm ${result.isCorrect
-        ? 'border-green-500/30 bg-green-500/10'
-        : 'border-red-500/30 bg-red-500/10'
+      ? 'border-green-500/30 bg-green-500/10'
+      : 'border-red-500/30 bg-red-500/10'
       }`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base font-bold ${result.isCorrect
-              ? 'bg-green-500 text-white'
-              : 'bg-red-500 text-white'
+            ? 'bg-green-500 text-white'
+            : 'bg-red-500 text-white'
             }`}>
             {index + 1}
           </span>
           <span className="text-base text-foreground/70">{result.category}</span>
-          <span className={`text-sm font-medium ${DIFFICULTY_COLORS[result.difficulty] ?? 'text-foreground/70'}`}>
+          <span className={`text-base font-medium ${DIFFICULTY_COLORS[result.difficulty] ?? 'text-foreground/70'}`}>
             {result.difficulty}
           </span>
         </div>
@@ -161,7 +161,7 @@ export default function ResultsPage() {
 
       {/* Results Section */}
       <div className="relative z-10 flex flex-1 flex-col items-center px-4 pb-16">
-        <div className="w-full max-w-3xl space-y-8">
+        <div className="w-full max-w-5xl space-y-8">
           {/* Score */}
           <div className="rounded-2xl border border-border bg-card/50 p-8 text-center backdrop-blur-sm">
             <div className="text-7xl font-bold text-primary sm:text-8xl">{results.score}%</div>
@@ -211,12 +211,14 @@ export default function ResultsPage() {
           )}
 
           {/* Restart Button */}
-          <button
-            onClick={handleRestart}
-            className="w-full rounded-xl bg-primary py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
-          >
-            Back to Home
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleRestart}
+              className="rounded-xl bg-primary px-10 py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
     </div>

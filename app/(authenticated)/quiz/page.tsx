@@ -279,7 +279,7 @@ function QuizContent() {
       <Navbar />
 
       {/* Main Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-8 px-20 pb-10 pt-24 sm:px-24">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-8 px-20 pb-10 pt-24 sm:px-24">
         <QuizProgress
           currentQuestion={state.currentIndex + 1}
           totalQuestions={state.questions.length}
