@@ -1,65 +1,158 @@
-import Image from "next/image";
+/**
+ * @file page.tsx
+ * @description Home page of the QuizTime application
+ *
+ * This is the main landing page that greets users and provides options to start
+ * or resume a quiz. It checks for active quiz state in localStorage and displays
+ * appropriate buttons based on authentication status and quiz state.
+ *
+ * Key features:
+ * - Animated 3D background with floating shapes
+ * - Start Quiz button (opens config dialog for authenticated users)
+ * - Resume Quiz button (visible if there's an active quiz in localStorage)
+ * - Redirects unauthenticated users to login page
+ */
 
-export default function Home() {
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { Navbar } from '@/components/navbar';
+import { QuizConfigDialog } from './(public)/_components/quiz-config-dialog';
+
+// LocalStorage key for saving quiz state
+const STORAGE_KEY_QUIZ_STATE = 'quizState';
+
+// Check if there's an active quiz in localStorage
+function hasActiveQuiz(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_QUIZ_STATE);
+    if (!saved) return false;
+    const parsed = JSON.parse(saved);
+    return parsed.status === 'active' && parsed.questions?.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export default function HomePage() {
+  const { status } = useSession();
+  const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const isAuthenticated = status === 'authenticated';
+  const hasResume = React.useSyncExternalStore(
+    () => () => {},
+    () => hasActiveQuiz(),
+    () => false,
+  );
+
+  // Open quiz config dialog or redirect to login
+  const handleStartQuiz = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    setDialogOpen(true);
+  };
+
+  // Resume saved quiz or redirect to login
+  const handleResumeQuiz = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    router.push('/quiz');
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background text-foreground">
+      <Navbar />
+
+      {/* Animated 3D Background */}
+      <div className="absolute inset-0">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted" />
+
+        {/* 3D Shape 1 - Large tilted rectangle */}
+        <div className="animate-float1 absolute top-10 left-10 h-[500px] w-[200px] rotate-12 bg-gradient-to-b from-muted/50 via-muted/30 to-muted/60 shadow-2xl blur-[1px] sm:left-20 sm:h-[600px] sm:w-[250px] md:left-32 md:h-[700px] md:w-[300px]" />
+
+        {/* 3D Shape 2 - Angled block */}
+        <div className="animate-float2 absolute top-40 left-48 h-[400px] w-[180px] -rotate-12 bg-gradient-to-b from-muted/40 via-muted/30 to-muted/50 shadow-xl sm:left-64 sm:h-[500px] sm:w-[200px] md:left-80 md:h-[600px] md:w-[240px]" />
+
+        {/* 3D Shape 3 - Right side cube */}
+        <div className="animate-float3 absolute right-10 bottom-20 h-[300px] w-[300px] rotate-45 bg-gradient-to-br from-muted/40 via-muted/30 to-muted/60 shadow-2xl sm:right-20 sm:h-[350px] sm:w-[350px] md:right-32 md:h-[400px] md:w-[400px]" />
+
+        {/* Light beam effect */}
+        <div className="animate-shine absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+
+        {/* Glow effect */}
+        <div className="animate-pulse-glow absolute top-1/4 left-1/3 h-96 w-96 rounded-full bg-foreground/5 blur-3xl" />
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 h-1/3 w-full bg-gradient-to-t from-background to-transparent" />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-20 text-center">
+        <h1 className="text-6xl font-bold tracking-tight text-foreground sm:text-7xl md:text-8xl lg:text-9xl">
+          QUIZ TIME
+        </h1>
+        <p className="mt-4 text-2xl font-semibold text-muted-foreground sm:text-3xl md:text-4xl">
+          Let&apos;s Put Your Knowledge to The Test!
+        </p>
+        <div className="mt-24 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          <button
+            onClick={handleStartQuiz}
+            className="group cursor-pointer rounded-full border-2 border-primary/40 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-primary backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_30px_rgba(179,255,0,0.4)] sm:px-12 sm:py-5 sm:text-xl"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Start Quiz
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="ml-2 inline-block transition-transform group-hover:translate-x-1"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+
+          {hasResume && (
+            <button
+              onClick={handleResumeQuiz}
+              className="group cursor-pointer rounded-full border-2 border-foreground/20 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-foreground backdrop-blur-sm transition-all duration-300 hover:border-foreground/40 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black sm:px-12 sm:py-5 sm:text-xl"
+            >
+              Resume Quiz
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ml-2 inline-block transition-transform group-hover:translate-x-1"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </button>
+          )}
         </div>
-      </main>
+      </div>
+
+      <QuizConfigDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }

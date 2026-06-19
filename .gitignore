@@ -28,6 +28,7 @@ dist/
 .swc/
 .turbo/
 node_modules/.cache/
+node_cache/
 
 # misc
 .DS_Store
@@ -45,6 +46,10 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# prisma
+prisma/dev.db
+prisma/dev.db-journal
 
 # vercel
 .vercel

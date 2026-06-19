@@ -4,7 +4,7 @@
 
 ### Overview
 
-A single-page quiz application built with Next.js (React) that allows users to log in, take timed quizzes from the Open Trivia Database API, and view results. The app supports session resumption via localStorage.
+A single-page quiz application built with Next.js (React) that allows users to register, log in, configure and take timed quizzes from the Open Trivia Database API, and view results. The app supports session resumption via localStorage and uses server-side authentication with NextAuth, JWT, and bcrypt.
 
 ---
 
@@ -14,6 +14,7 @@ A single-page quiz application built with Next.js (React) that allows users to l
 - Implement clean, maintainable code following frontend engineering best practices
 - Use modern React patterns (hooks, context, react-query)
 - Ensure code quality with ESLint, Prettier, Husky, and lint-staged
+- Implement server-side authentication with NextAuth, JWT, and bcrypt
 
 ---
 
@@ -21,28 +22,35 @@ A single-page quiz application built with Next.js (React) that allows users to l
 
 - Users who want to test their trivia knowledge
 - Users who need a timed quiz experience with progress tracking
+- Users who want to customize their quiz experience (category, difficulty, type)
 
 ---
 
 ## 3. Functional Requirements
 
-### 3.1 Authentication (Login)
+### 3.1 Authentication
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| AUTH-01 | User can log in with username | High |
-| AUTH-02 | Login state persisted in localStorage | High |
-| AUTH-03 | Redirect to login page if not authenticated | High |
-| AUTH-04 | Logout functionality | Medium |
+| AUTH-01 | User can register with name, email, and password | High |
+| AUTH-02 | User can log in with email and password | High |
+| AUTH-03 | Passwords are hashed with bcrypt | High |
+| AUTH-04 | JWT-based session management with NextAuth | High |
+| AUTH-05 | Redirect to login page if not authenticated | High |
+| AUTH-06 | Logout functionality | High |
+| AUTH-07 | Server-side authentication middleware | High |
 
 ### 3.2 Quiz Configuration
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| QC-01 | Fetch questions from https://opentdb.com/api.php | High |
-| QC-02 | Default 10 questions per quiz | Medium |
-| QC-03 | Support multiple question types (boolean, multiple choice) | High |
-| QC-04 | Decode HTML entities in questions and answers | High |
+| QC-01 | User can select number of questions (5, 10, 15, 20) | High |
+| QC-02 | User can select category from Open Trivia DB categories | High |
+| QC-03 | User can select difficulty (Any, Easy, Medium, Hard) | High |
+| QC-04 | User can select question type (Any, Multiple, True/False) | High |
+| QC-05 | Fetch questions from https://opentdb.com/api.php | High |
+| QC-06 | Decode HTML entities in questions and answers | High |
+| QC-07 | Support session tokens for unique questions | Medium |
 
 ### 3.3 Quiz Timer
 
@@ -80,8 +88,9 @@ A single-page quiz application built with Next.js (React) that allows users to l
 | SR-01 | Save current question index to localStorage | High |
 | SR-02 | Save answers to localStorage | High |
 | SR-03 | Save remaining time to localStorage | High |
-| SR-04 | Resume quiz on page reload | High |
-| SR-05 | Clear saved state on quiz completion | Medium |
+| SR-04 | Save quiz configuration to localStorage | High |
+| SR-05 | Resume quiz on page reload | High |
+| SR-06 | Clear saved state on quiz completion | Medium |
 
 ---
 
@@ -122,6 +131,8 @@ A single-page quiz application built with Next.js (React) that allows users to l
 | UI-02 | Loading spinner during data fetch | Medium |
 | UI-03 | Error messages for failed operations | High |
 | UI-04 | shadcn/ui components for consistent design | High |
+| UI-05 | Select component for options with >4 choices | High |
+| UI-06 | RadioGroup component for options with ≤4 choices | High |
 
 ---
 
@@ -136,16 +147,18 @@ A single-page quiz application built with Next.js (React) that allows users to l
 | UI Components | shadcn/ui |
 | Styling | Tailwind CSS |
 | Data Fetching | React Query |
-| Forms | React Hook Form + Yup validation |
+| Forms | React Hook Form + Zod validation |
+| Authentication | NextAuth.js with JWT strategy |
+| Password Hashing | bcryptjs |
+| Database | Prisma with SQLite |
 | State Management | React Context + useState |
 | Code Quality | ESLint + Prettier |
 | Git Hooks | Husky + lint-staged |
-| Package Manager | pnpm |
+| Package Manager | npm |
 
 ### 5.2 Folder Structure
 
 ```
-src/
 ├── app/
 │   ├── _components/
 │   │   ├── guard.tsx
@@ -162,6 +175,8 @@ src/
 │   │   │   │   └── use-quiz-timer.ts
 │   │   │   ├── _types/
 │   │   │   │   └── quiz.ts
+│   │   │   ├── _const/
+│   │   │   │   └── quiz-config.ts
 │   │   │   └── page.tsx
 │   │   └── results/
 │   │       ├── _components/
@@ -170,23 +185,32 @@ src/
 │   │       │   └── use-results.ts
 │   │       └── page.tsx
 │   ├── (public)/
-│   │   └── login/
+│   │   ├── login/
+│   │   │   ├── _components/
+│   │   │   │   └── login-form.tsx
+│   │   │   ├── _hooks/
+│   │   │   └── page.tsx
+│   │   └── register/
 │   │       ├── _components/
-│   │       │   └── login-form.tsx
+│   │       │   └── register-form.tsx
 │   │       ├── _hooks/
-│   │       │   └── use-login.ts
 │   │       └── page.tsx
+│   ├── api/
+│   │   └── auth/
+│   │       ├── [...nextauth]/
+│   │       │   └── route.ts
+│   │       └── register/
+│   │           └── route.ts
 │   ├── layout.tsx
 │   └── page.tsx
 ├── api/
-│   ├── quiz/
-│   │   ├── index.ts
-│   │   └── type.ts
-│   └── client.ts
+│   └── quiz/
+│       ├── index.ts
+│       └── type.ts
 ├── common/
 │   ├── constants/
-│   │   ├── permissions.ts
-│   │   └── quiz-config.ts
+│   │   ├── quiz-config.ts
+│   │   └── trivia-categories.ts
 │   ├── enums/
 │   │   └── quiz-status.ts
 │   └── types/
@@ -194,13 +218,16 @@ src/
 ├── components/
 │   └── ui/ (shadcn/ui)
 ├── hooks/
-│   ├── use-auth.ts
-│   └── request/
-│       └── use-query.ts
+│   └── use-auth.ts
 ├── libs/
-│   └── utils.ts
+│   ├── auth.ts
+│   └── prisma.ts
+├── prisma/
+│   └── schema.prisma
 ├── providers/
-│   └── query-provider.tsx
+│   └── auth-provider.tsx
+├── types/
+│   └── next-auth.d.ts
 └── utils/
     ├── decode-html.ts
     └── localStorage.ts
@@ -211,7 +238,7 @@ src/
 #### Open Trivia Database
 
 ```typescript
-// GET https://opentdb.com/api.php?amount=10
+// GET https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&type=multiple
 Response format:
 {
   response_code: number,
@@ -226,24 +253,91 @@ Response format:
 }
 ```
 
+#### API Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| amount | int | Number of questions (1-50) |
+| category | int | Category ID (see categories below) |
+| difficulty | string | easy, medium, hard |
+| type | string | boolean, multiple |
+| encode | string | urlLegacy, url3986, base64 |
+| token | string | Session token for unique questions |
+
+#### Categories
+
+| ID | Category |
+|----|----------|
+| 9 | General Knowledge |
+| 10 | Entertainment: Books |
+| 11 | Entertainment: Film |
+| 12 | Entertainment: Music |
+| 13 | Entertainment: Musicals & Theatres |
+| 14 | Entertainment: Television |
+| 15 | Entertainment: Video Games |
+| 16 | Entertainment: Board Games |
+| 17 | Science & Nature |
+| 18 | Science: Computers |
+| 19 | Science: Mathematics |
+| 20 | Mythology |
+| 21 | Sports |
+| 22 | Geography |
+| 23 | History |
+| 24 | Politics |
+| 25 | Art |
+| 26 | Celebrities |
+| 27 | Animals |
+| 28 | Vehicles |
+| 29 | Entertainment: Comics |
+| 30 | Science: Gadgets |
+| 31 | Entertainment: Japanese Anime & Manga |
+| 32 | Entertainment: Cartoon & Animations |
+
 ---
 
 ## 6. User Flows
 
-### 6.1 Login Flow
+### 6.1 Registration Flow
 
 ```
 User opens app
   → Redirected to /login (if not authenticated)
-  → Enters username
-  → Clicks "Start Quiz"
-  → Redirected to /quiz
+  → Clicks "Register" link
+  → Fills in name, email, password, confirm password
+  → Submits form
+  → Account created with hashed password
+  → Auto sign-in and redirect to /quiz
 ```
 
-### 6.2 Quiz Flow
+### 6.2 Login Flow
+
+```
+User opens app
+  → Redirected to /login (if not authenticated)
+  → Enters email and password
+  → Clicks "Sign In"
+  → JWT token created
+  → Redirected to /
+```
+
+### 6.3 Quiz Configuration Flow
+
+```
+User on /
+  → Sees quiz configuration form
+  → Selects number of questions (5, 10, 15, 20)
+  → Selects category (Any or specific category)
+  → Selects difficulty (Any, Easy, Medium, Hard)
+  → Selects type (Any, Multiple, True/False)
+  → Clicks "Start Quiz"
+  → Redirected to /quiz with configuration
+```
+
+### 6.4 Quiz Flow
 
 ```
 User on /quiz
+  → Questions fetched from API with configuration
   → Question displayed with timer
   → User selects answer
   → Auto-advance to next question
@@ -252,7 +346,7 @@ User on /quiz
   → Redirected to /results
 ```
 
-### 6.3 Resume Flow
+### 6.5 Resume Flow
 
 ```
 User refreshes page during quiz
@@ -262,24 +356,37 @@ User refreshes page during quiz
     → Restore answers
     → Resume timer
   → If no saved state:
-    → Start new quiz
+    → Redirect to / for new quiz
 ```
 
-### 6.4 Results Flow
+### 6.6 Results Flow
 
 ```
 User on /results
   → Sees score summary (correct/incorrect/total)
   → Option to restart quiz
   → Clears localStorage state
-  → Redirected to /quiz
+  → Redirected to /
 ```
 
 ---
 
 ## 7. Data Models
 
-### 7.1 Question
+### 7.1 User (Prisma)
+
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+### 7.2 Question
 
 ```typescript
 interface Question {
@@ -294,11 +401,23 @@ interface Question {
 }
 ```
 
-### 7.2 Quiz State
+### 7.3 Quiz Configuration
+
+```typescript
+interface QuizConfig {
+  amount: number; // 5, 10, 15, 20
+  category: number; // 0 for any, or category ID
+  difficulty: string; // "any", "easy", "medium", "hard"
+  type: string; // "any", "multiple", "boolean"
+}
+```
+
+### 7.4 Quiz State
 
 ```typescript
 interface QuizState {
   questions: Question[];
+  config: QuizConfig;
   currentIndex: number;
   answers: Record<number, string>;
   timeRemaining: number;
@@ -306,7 +425,7 @@ interface QuizState {
 }
 ```
 
-### 7.3 Quiz Results
+### 7.5 Quiz Results
 
 ```typescript
 interface QuizResults {
@@ -319,26 +438,41 @@ interface QuizResults {
 }
 ```
 
-### 7.4 User
+### 7.6 User (Session)
 
 ```typescript
 interface User {
-  username: string;
-  isAuthenticated: boolean;
+  id: string;
+  name: string | null;
+  email: string;
 }
 ```
 
 ---
 
-## 8. Validation Schema (Yup)
+## 8. Validation Schema (Zod)
 
 ```typescript
-const loginSchema = yup.object({
-  username: yup
-    .string()
-    .required("Username is required")
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters"),
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+const quizConfigSchema = z.object({
+  amount: z.number().min(1).max(50),
+  category: z.number().min(0).max(32),
+  difficulty: z.enum(["any", "easy", "medium", "hard"]),
+  type: z.enum(["any", "multiple", "boolean"]),
 });
 ```
 
@@ -350,12 +484,14 @@ const loginSchema = yup.object({
 
 - Network errors → Toast notification with generic message
 - API errors → Log to console, show user-friendly message
+- Auth errors → Redirect to login with error message
 
 ### Business Level
 
 - Quiz fetch failure → "Failed to load questions. Please try again."
 - Timer expiry → Auto-submit and show results
 - Invalid answer → Prevent submission, show validation message
+- Registration errors → "Email already exists" or "Invalid input"
 
 ---
 
@@ -363,26 +499,29 @@ const loginSchema = yup.object({
 
 | ID | Criteria | Status |
 |----|----------|--------|
-| AC-01 | User can log in with username | Pending |
-| AC-02 | Questions fetched from Open Trivia DB | Pending |
-| AC-03 | One question displayed per page | Pending |
-| AC-04 | Auto-advance on answer selection | Pending |
-| AC-05 | Timer counts down and auto-submits | Pending |
-| AC-06 | Results page shows correct/incorrect/total | Pending |
-| AC-07 | Quiz resumes after page refresh | Pending |
-| AC-08 | ESLint and Prettier configured | Pending |
-| AC-09 | Husky and lint-staged configured | Pending |
-| AC-10 | Code follows folder structure convention | Pending |
+| AC-01 | User can register with name, email, password | Pending |
+| AC-02 | User can log in with email and password | Pending |
+| AC-03 | Passwords are hashed with bcrypt | Pending |
+| AC-04 | JWT session management works | Pending |
+| AC-05 | User can configure quiz (amount, category, difficulty, type) | Pending |
+| AC-06 | Questions fetched from Open Trivia DB with config | Pending |
+| AC-07 | One question displayed per page | Pending |
+| AC-08 | Auto-advance on answer selection | Pending |
+| AC-09 | Timer counts down and auto-submits | Pending |
+| AC-10 | Results page shows correct/incorrect/total | Pending |
+| AC-11 | Quiz resumes after page refresh | Pending |
+| AC-12 | ESLint and Prettier configured | Pending |
+| AC-13 | Husky and lint-staged configured | Pending |
+| AC-14 | Code follows folder structure convention | Pending |
 
 ---
 
 ## 11. Out of Scope
 
-- User registration (only login with username)
-- Backend authentication (client-side only)
-- Multiple quiz categories selection
 - Leaderboard functionality
 - Social sharing
+- Multiple quiz categories per request
+- Quiz time limit configuration (fixed at 60s per question)
 
 ---
 
@@ -391,7 +530,8 @@ const loginSchema = yup.object({
 | Phase | Duration | Deliverables |
 |-------|----------|--------------|
 | Setup | Day 1 | Project init, ESLint, Prettier, Husky, shadcn/ui |
-| Auth | Day 1 | Login page, useAuth hook |
+| Auth | Day 1 | Register, Login, NextAuth, Prisma, JWT |
+| Quiz Config | Day 1 | Home page with quiz configuration form |
 | Quiz Core | Day 2 | Quiz page, question display, answer selection |
 | Timer | Day 2 | Quiz timer, auto-submit |
 | Resume | Day 2 | localStorage integration |
@@ -406,8 +546,23 @@ const loginSchema = yup.object({
 ### Open Trivia DB API Reference
 
 - Base URL: `https://opentdb.com/api.php`
+- Category URL: `https://opentdb.com/api_category.php`
+- Session Token: `https://opentdb.com/api_token.php?command=request`
 - Parameters:
-  - `amount` (int): Number of questions (default: 10)
-  - `category` (int): Category ID (optional)
-  - `difficulty` (string): easy, medium, hard (optional)
-  - `type` (string): boolean, multiple (optional)
+  - `amount` (int): Number of questions (1-50)
+  - `category` (int): Category ID (9-32)
+  - `difficulty` (string): easy, medium, hard
+  - `type` (string): boolean, multiple
+  - `encode` (string): urlLegacy, url3986, base64
+  - `token` (string): Session token for unique questions
+
+### Response Codes
+
+| Code | Description |
+|------|-------------|
+| 0 | Success |
+| 1 | No Results |
+| 2 | Invalid Parameter |
+| 3 | Token Not Found |
+| 4 | Token Empty |
+| 5 | Rate Limit |
