@@ -2,6 +2,8 @@
 
 A modern, feature-rich quiz application built with Next.js 16, TypeScript, and Tailwind CSS. Test your knowledge with questions from the Open Trivia Database API, complete with timers, progress tracking, and a sleek neon-green themed UI.
 
+**Live Demo:** [quiztime-dot.vercel.app](https://quiztime-dot.vercel.app/)
+
 ---
 
 ## Screenshots
@@ -48,6 +50,7 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 - **Animated 3D Background** - Floating geometric shapes with light beam and glow effects
 - **Responsive Design** - Optimized for mobile, tablet, and desktop with a neon green (#b3ff00) accent color
 - **HTML Entity Decoding** - Properly decodes special characters from the Open Trivia Database API responses
+- **Vercel Deployment** - Fully deployed and configured for serverless environment
 
 ---
 
@@ -61,10 +64,9 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 | **Tailwind CSS** | 4 | Utility-first CSS styling |
 | **shadcn/ui** | - | Pre-built UI components (Dialog, Select, RadioGroup, Slider, etc.) |
 | **Base UI** | 1.6 | Headless component primitives (via shadcn) |
-| **Radix UI** | 1.6 | Accessible component primitives |
 | **NextAuth** | v5 (beta) | Authentication (Credentials provider) |
-| **Prisma** | 5.22 | ORM for SQLite database |
-| **SQLite** | - | Lightweight database for user storage |
+| **Prisma** | 5.22 | ORM for PostgreSQL database |
+| **Neon PostgreSQL** | - | Serverless PostgreSQL database (free tier) |
 | **bcryptjs** | 3.0 | Password hashing |
 | **React Hook Form** | 7.79 | Form state management |
 | **Zod** | 4.4 | Schema validation |
@@ -81,14 +83,15 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 
 - **Node.js** 18+ (recommended: 20+)
 - **npm** or **yarn** or **pnpm**
+- **Neon account** (free) for PostgreSQL database - [neon.tech](https://neon.tech)
 
 ### Installation
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/react-quiz-dot.git
-   cd react-quiz-dot
+   git clone https://github.com/rhesatsaqif23/react-quiz.git
+   cd react-quiz
    ```
 
 2. **Install dependencies**
@@ -99,29 +102,36 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 
 3. **Set up environment variables**
 
-   Create a `.env` file in the project root:
+   Copy the example env file and fill in your values:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Then edit `.env.local`:
 
    ```env
-   # Database
-   DATABASE_URL="file:./dev.db"
+   # Database (Neon PostgreSQL) - Get from https://neon.tech
+   DATABASE_URL="postgresql://user:password@host:5432/dbname?sslmode=require"
 
    # NextAuth
    NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-secret-key-change-this-in-production"
+   NEXTAUTH_SECRET="your-secret-key-here"
    ```
 
-   > **Important:** Generate a strong secret for production. You can use:
-   > ```bash
-   > openssl rand -base64 32
-   > ```
+   Generate a secret key:
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   ```
 
 4. **Initialize the database**
 
    ```bash
-   npx prisma migrate dev
+   npx prisma db push
    ```
 
-   This creates the SQLite database and applies the schema.
+   This creates the database tables in your Neon PostgreSQL database.
 
 5. **Run the development server**
 
@@ -138,9 +148,35 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 | Script | Description |
 |---|---|
 | `npm run dev` | Start development server |
-| `npm run build` | Build for production |
+| `npm run build` | Build for production (includes prisma generate + db push) |
 | `npm start` | Start production server |
 | `npm run lint` | Run ESLint |
+
+---
+
+## Vercel Deployment
+
+### Setup
+
+1. **Push to GitHub**
+
+2. **Import project in Vercel** - [vercel.com/new](https://vercel.com/new)
+
+3. **Set Environment Variables** in Vercel Dashboard → Settings → Environment Variables:
+
+   | Key | Value |
+   |-----|-------|
+   | `DATABASE_URL` | Your Neon PostgreSQL connection string |
+   | `NEXTAUTH_SECRET` | Generate with: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+   | `NEXTAUTH_URL` | `https://your-app.vercel.app` |
+
+4. **Deploy** - Vercel automatically runs `prisma generate` and `prisma db push` during build
+
+### Important Notes
+
+- SQLite does **not** work on Vercel (ephemeral filesystem). This project uses **Neon PostgreSQL** (free tier).
+- The build script automatically runs `prisma generate` and `prisma db push` to set up the database.
+- `.env.local` is only for local development. Vercel uses the dashboard environment variables.
 
 ---
 
@@ -149,65 +185,58 @@ A modern, feature-rich quiz application built with Next.js 16, TypeScript, and T
 ```
 react-quiz-dot/
 ├── app/
-│   ├── _components/                # Shared global components
-│   │   ├── navbar.tsx              # Navigation bar with theme toggle
-│   │   └── loading-spinner.tsx     # Global loading component
 │   ├── (authenticated)/            # Protected routes (require login)
 │   │   ├── quiz/
 │   │   │   ├── _components/        # Quiz-specific components
-│   │   │   │   ├── question-card.tsx
-│   │   │   │   ├── quiz-timer.tsx
-│   │   │   │   └── quiz-progress.tsx
-│   │   │   ├── _const/             # Quiz constants
-│   │   │   ├── _hooks/             # Quiz hooks
-│   │   │   ├── _types/             # Quiz types
-│   │   │   └── page.tsx            # Main quiz page
+│   │   │   │   ├── question-card.tsx    # Answer options with A/B/C/D letters
+│   │   │   │   ├── quiz-timer.tsx       # Dual timer (question + global)
+│   │   │   │   └── quiz-progress.tsx    # Question counter display
+│   │   │   └── page.tsx            # Main quiz page with auto-advance logic
 │   │   └── results/
-│   │       ├── _components/        # Results-specific components
-│   │       ├── _hooks/             # Results hooks
-│   │       └── page.tsx            # Results page
+│   │       └── page.tsx            # Results with per-question review
 │   ├── (public)/                   # Public routes
 │   │   ├── _components/            # Shared public components
-│   │   │   ├── quiz-config-dialog.tsx
-│   │   │   └── quiz-config-form.tsx
+│   │   │   ├── quiz-config-dialog.tsx   # Dialog wrapper for quiz config
+│   │   │   └── quiz-config-form.tsx     # Category/difficulty/type selectors
 │   │   ├── login/
 │   │   │   ├── _components/
+│   │   │   │   └── login-form.tsx       # Email/password login form
 │   │   │   └── page.tsx
 │   │   └── register/
 │   │       ├── _components/
+│   │       │   └── register-form.tsx    # Registration form with validation
 │   │       └── page.tsx
-│   ├── api/
-│   │   └── auth/
-│   │       └── [...nextauth]/
-│   │           └── route.ts        # NextAuth API route
-│   ├── globals.css                 # Global styles + Tailwind
+│   ├── api/auth/
+│   │   ├── [...nextauth]/route.ts  # NextAuth API handlers
+│   │   └── register/route.ts       # User registration endpoint
+│   ├── globals.css                 # Theme variables + animations
 │   ├── layout.tsx                  # Root layout with providers
-│   └── page.tsx                    # Homepage
+│   └── page.tsx                    # Homepage with start/resume buttons
 ├── components/
+│   ├── navbar.tsx                  # Glassmorphism navbar with auth buttons
+│   ├── theme-toggle.tsx            # Dark/light mode toggle
 │   └── ui/                         # shadcn/ui components
 ├── common/
 │   ├── constants/
-│   │   └── trivia-categories.ts   # Categories, difficulties, types
-│   ├── enums/
-│   │   └── quiz-status.ts         # Quiz status enum
+│   │   └── trivia-categories.ts    # 24 categories, difficulties, types
 │   └── types/
-│       └── quiz.ts                 # TypeScript interfaces
+│       └── quiz.ts                 # TypeScript interfaces (QuizState, Question, etc.)
 ├── hooks/
 │   └── use-auth.ts                 # Client-side auth hook
 ├── libs/
-│   ├── auth.ts                     # NextAuth configuration
+│   ├── auth.ts                     # NextAuth v5 configuration
 │   └── prisma.ts                   # Prisma client singleton
 ├── prisma/
-│   └── schema.prisma               # Database schema
+│   └── schema.prisma               # PostgreSQL database schema
 ├── providers/
 │   ├── auth-provider.tsx           # NextAuth SessionProvider
 │   └── theme-provider.tsx          # next-themes ThemeProvider
 ├── utils/
-│   ├── decode-html.ts              # HTML entity decoder
-│   └── localStorage.ts             # localStorage utilities
+│   └── decode-html.ts              # HTML entity decoder for API responses
 ├── types/
 │   └── next-auth.d.ts              # NextAuth type extensions
-├── middleware.ts                    # Auth middleware
+├── middleware.ts                    # Route protection middleware
+├── .env.example                    # Environment variable template
 └── screenshots/                    # App screenshots
 ```
 
@@ -217,9 +246,9 @@ react-quiz-dot/
 
 ### Quiz Flow
 
-1. **Landing Page** - User sees the homepage with "Start Quiz" and optionally "Resume Quiz" buttons. An animated 3D background with floating shapes is displayed.
+1. **Landing Page** - User sees the homepage with "Start Quiz" and optionally "Resume Quiz" buttons (if a quiz was interrupted). An animated 3D background with floating shapes is displayed.
 
-2. **Authentication** - Unauthenticated users are redirected to `/login`. New users can register at `/register`. Credentials are verified with bcrypt and stored in SQLite via Prisma.
+2. **Authentication** - Unauthenticated users are redirected to `/login`. New users can register at `/register`. Credentials are verified with bcrypt and stored in PostgreSQL via Prisma.
 
 3. **Quiz Configuration** - A dialog opens where the user selects:
    - Number of questions (5-30)
@@ -286,16 +315,16 @@ docs: update README
 ### Code Standards
 
 - ESLint with recommended rules
-- Prettier for formatting
 - TypeScript strict mode
 - PascalCase for components, camelCase for functions/variables
 - kebab-case for file names
+- Inline documentation for all essential code
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
