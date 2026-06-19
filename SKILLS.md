@@ -12,13 +12,22 @@ npx create-next-app@latest react-quiz --typescript --app --tailwind --eslint --s
 cd react-quiz
 
 # Install dependencies
-pnpm add @tanstack/react-query react-hook-form @hookform/resolvers yup axios
+npm install next-auth@beta bcryptjs @prisma/client react-hook-form @hookform/resolvers zod
+
+# Install dev dependencies
+npm install -D @types/bcryptjs prisma
 
 # Install shadcn/ui
 npx shadcn@latest init
 
 # Add required shadcn/ui components
-npx shadcn@latest add button card input label progress toast toaster
+npx shadcn@latest add button card input label select radio-group progress toast toaster
+
+# Initialize Prisma
+npx prisma init
+
+# Run Prisma migration
+npx prisma migrate dev --name init
 ```
 
 ### ESLint Setup

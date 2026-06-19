@@ -4,17 +4,17 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { QuizConfigForm } from './(public)/_components/quiz-config-form';
+import { LoginForm } from './_components/login-form';
 
-export default function HomePage() {
+export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (session) {
+      router.push('/quiz');
     }
-  }, [session, status, router]);
+  }, [session, router]);
 
   if (status === 'loading') {
     return (
@@ -24,13 +24,13 @@ export default function HomePage() {
     );
   }
 
-  if (!session) {
+  if (session) {
     return null;
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6 md:p-8 lg:p-12">
-      <QuizConfigForm />
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <LoginForm />
     </div>
   );
 }

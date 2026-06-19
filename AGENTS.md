@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a React Quiz Application built with Next.js 14 (App Directory), TypeScript, and shadcn/ui. The application allows users to take timed quizzes from the Open Trivia Database API.
+This is a React Quiz Application built with Next.js 14 (App Directory), TypeScript, and shadcn/ui. The application allows users to register, log in, configure and take timed quizzes from the Open Trivia Database API, and view results. The app uses server-side authentication with NextAuth, JWT, and bcrypt.
 
 ---
 
@@ -61,7 +61,7 @@ This is a React Quiz Application built with Next.js 14 (App Directory), TypeScri
 - This approach: Use Prettier for formatting only, ESLint for code quality
 
 ```bash
-pnpm add -D eslint-config-prettier
+npm add -D eslint-config-prettier
 ```
 
 #### Husky + lint-staged
@@ -70,13 +70,13 @@ pnpm add -D eslint-config-prettier
 - lint-staged: Run linters on staged git files
 
 ```bash
-pnpm add -D husky lint-staged
+npm add -D husky lint-staged
 
 # Initialize Husky
-pnpm exec husky install
+npx husky install
 
 # Add pre-commit hook
-pnpm exec husky add .husky/pre-commit "pnpm exec lint-staged"
+npx husky add .husky/pre-commit "npx lint-staged"
 ```
 
 ```json
@@ -116,8 +116,7 @@ pnpm exec husky add .husky/pre-commit "pnpm exec lint-staged"
 ### Folder Structure
 
 ```
-src/
-├── app/                          # Next.js App Directory
+├── app/
 │   ├── _components/              # Shared components (global)
 │   │   ├── guard.tsx             # Permission guard component
 │   │   ├── loading-spinner.tsx   # Global loading component
@@ -128,45 +127,56 @@ src/
 │   │   │   ├── _hooks/           # Module-specific hooks
 │   │   │   ├── _types/           # Module-specific types
 │   │   │   ├── _const/           # Module-specific constants
-│   │   │   ├── _utils/           # Module-specific utilities
 │   │   │   └── page.tsx          # Page component
 │   │   └── results/
 │   │       ├── _components/
 │   │       ├── _hooks/
 │   │       └── page.tsx
 │   ├── (public)/                 # Public routes
-│   │   └── login/
+│   │   ├── _components/          # Shared public components
+│   │   ├── login/
+│   │   │   ├── _components/
+│   │   │   └── page.tsx
+│   │   └── register/
 │   │       ├── _components/
-│   │       ├── _hooks/
 │   │       └── page.tsx
-│   ├── layout.tsx                # Root layout
-│   └── page.tsx                  # Root page
+│   ├── api/
+│   │   └── auth/
+│   │       ├── [...nextauth]/
+│   │       │   └── route.ts
+│   │       └── register/
+│   │           └── route.ts
+│   ├── layout.tsx
+│   └── page.tsx
 ├── api/                          # API layer
-│   ├── quiz/
-│   │   ├── index.ts              # API functions
-│   │   └── type.ts               # API types
-│   └── client.ts                 # HTTP client configuration
-├── common/                       # Shared utilities
+│   └── quiz/
+│       ├── index.ts
+│       └── type.ts
+├── common/
 │   ├── constants/
-│   │   ├── permissions.ts        # Permission definitions
-│   │   └── quiz-config.ts        # Quiz configuration
+│   │   ├── trivia-categories.ts
+│   │   └── quiz-config.ts
 │   ├── enums/
-│   │   └── quiz-status.ts        # Status enums
+│   │   └── quiz-status.ts
 │   └── types/
-│       └── response.ts           # Common response types
-├── components/                   # Shared UI components
+│       ├── quiz.ts
+│       └── response.ts
+├── components/
 │   └── ui/                       # shadcn/ui components
-├── hooks/                        # Shared hooks
-│   ├── use-auth.ts               # Authentication hook
-│   └── request/
-│       └── use-query.ts          # React Query wrapper
-├── libs/                         # Libraries and utilities
-│   └── utils.ts                  # shadcn/ui utils
-├── providers/                    # Context providers
-│   └── query-provider.tsx        # React Query provider
-└── utils/                        # Utility functions
-    ├── decode-html.ts            # HTML entity decoder
-    └── localStorage.ts           # localStorage helpers
+├── hooks/
+│   └── use-auth.ts
+├── libs/
+│   ├── auth.ts
+│   └── prisma.ts
+├── prisma/
+│   └── schema.prisma
+├── providers/
+│   └── auth-provider.tsx
+├── types/
+│   └── next-auth.d.ts
+└── utils/
+    ├── decode-html.ts
+    └── localStorage.ts
 ```
 
 ---
@@ -304,6 +314,7 @@ const QuestionCard = React.memo(({ question, onAnswer }: QuestionCardProps) => {
 ```typescript
 const initialState: QuizState = {
   questions: [],
+  config: DEFAULT_QUIZ_CONFIG,
   currentIndex: 0,
   answers: {},
   timeRemaining: 60,
@@ -347,15 +358,12 @@ if (error) {
 #### Validation
 
 ```typescript
-// Use Yup for validation schemas
-import * as yup from 'yup';
+// Use Zod for validation schemas
+import { z } from 'zod';
 
-const loginSchema = yup.object({
-  username: yup
-    .string()
-    .required('Username is required')
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be at most 20 characters'),
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 ```
 
@@ -363,38 +371,81 @@ const loginSchema = yup.object({
 
 ### Authentication
 
+#### Server-Side Authentication with NextAuth
+
+```typescript
+// libs/auth.ts
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import { db } from '@/libs/prisma';
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        // Validate and authenticate user
+      },
+    }),
+  ],
+  session: {
+    strategy: 'jwt',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
+  pages: {
+    signIn: '/login',
+  },
+};
+```
+
 #### Client-Side Authentication Hook
 
 ```typescript
 // hooks/use-auth.ts
+'use client';
+
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useCallback } from 'react';
+
 export const useAuth = () => {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const isAuthenticated = status === 'authenticated';
+  const isLoading = status === 'loading';
+  const user = session?.user;
 
-  const login = (username: string) => {
-    const newUser = { username, isAuthenticated: true };
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    router.push('/quiz');
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('quizState');
+  const logout = useCallback(async () => {
+    await signOut({ redirect: false });
     router.push('/login');
+  }, [router]);
+
+  return {
+    user,
+    session,
+    isAuthenticated,
+    isLoading,
+    logout,
   };
-
-  const isAuthenticated = user?.isAuthenticated ?? false;
-
-  return { user, isAuthenticated, login, logout };
 };
 ```
 
@@ -405,21 +456,15 @@ export const useAuth = () => {
 #### Infrastructure Level
 
 ```typescript
-// api/client.ts
-import axios from 'axios';
-
-const httpClient = axios.create({
-  baseURL: 'https://opentdb.com/api.php',
-});
-
+// libs/auth.ts
+// Network errors and HTTP status codes are handled at this level
 httpClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Infrastructure level: Network errors
     if (error.response?.status === 500) {
-      toast.error('Server error. Please try again later.');
+      throw new Error('Server error. Please try again later.');
     } else if (!error.response) {
-      toast.error('Network error. Please check your connection.');
+      throw new Error('Network error. Please check your connection.');
     }
     return Promise.reject(error);
   }
@@ -429,19 +474,14 @@ httpClient.interceptors.response.use(
 #### Business Level
 
 ```typescript
-// hooks/use-quiz.ts
-const handleAnswer = async (answer: string) => {
-  try {
-    // Business logic
-    selectAnswer(answer);
-    moveToNextQuestion();
-  } catch (error) {
-    // Business level: Quiz-specific errors
-    if (error instanceof QuizError) {
-      toast.error(error.message);
-    }
-  }
-};
+// app/api/auth/register/route.ts
+// Business logic errors are handled at this level
+if (existingUser) {
+  return NextResponse.json(
+    { error: 'User with this email already exists' },
+    { status: 409 }
+  );
+}
 ```
 
 ---
@@ -471,7 +511,45 @@ const handleAnswer = async (answer: string) => {
 |-------|----------------|---------|
 | Infrastructure | Network errors, HTTP status codes | 500 error → "Server error" |
 | Domain | Business logic errors | Email already registered → "Email taken" |
-| UI | User-facing messages | Form validation → "Username required" |
+| UI | User-facing messages | Form validation → "Email required" |
+
+---
+
+### UI Components
+
+#### shadcn/ui
+
+- Use Select component for options with more than 4 choices
+- Use RadioGroup component for options with 4 or fewer choices
+- Follow shadcn/ui documentation for component usage
+
+```tsx
+// Select component example (>4 options)
+<Select value={value} onValueChange={onChange}>
+  <SelectTrigger>
+    <SelectValue placeholder="Select option" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      {items.map((item) => (
+        <SelectItem key={item.value} value={item.value}>
+          {item.label}
+        </SelectItem>
+      ))}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+// RadioGroup component example (≤4 options)
+<RadioGroup value={value} onValueChange={onChange}>
+  {items.map((item) => (
+    <div key={item.value} className="flex items-center space-x-2">
+      <RadioGroupItem value={item.value} id={item.value} />
+      <Label htmlFor={item.value}>{item.label}</Label>
+    </div>
+  ))}
+</RadioGroup>
+```
 
 ---
 
@@ -481,10 +559,13 @@ const handleAnswer = async (answer: string) => {
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
+
+# Initialize Prisma
+npx prisma migrate dev
 
 # Run development server
-pnpm run dev
+npm run dev
 
 # Open browser at http://localhost:3000
 ```
@@ -493,10 +574,10 @@ pnpm run dev
 
 ```bash
 # Build production
-pnpm run build
+npm run build
 
 # Start production server
-pnpm start
+npm start
 ```
 
 ---
@@ -505,13 +586,13 @@ pnpm start
 
 | Script | Description |
 |--------|-------------|
-| `pnpm run dev` | Start development server |
-| `pnpm run build` | Build for production |
-| `pnpm start` | Start production server |
-| `pnpm run lint` | Run ESLint |
-| `pnpm run lint:fix` | Run ESLint with auto-fix |
-| `pnpm run format` | Run Prettier |
-| `pnpm run format:check` | Check Prettier formatting |
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with auto-fix |
+| `npm run format` | Run Prettier |
+| `npm run format:check` | Check Prettier formatting |
 
 ---
 
@@ -519,7 +600,7 @@ pnpm start
 
 1. Create feature branch from `main`
 2. Make changes following coding standards
-3. Run `pnpm run lint` and `pnpm run format`
+3. Run `npm run lint` and `npm run format`
 4. Commit changes (Husky will run pre-commit hooks)
 5. Push to remote
 6. Create pull request

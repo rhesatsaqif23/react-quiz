@@ -1,0 +1,177 @@
+'use client';
+
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
+import {
+  TRIVIA_CATEGORIES,
+  QUIZ_DIFFICULTIES,
+  QUIZ_TYPES,
+  QUIZ_AMOUNTS,
+  DEFAULT_QUIZ_CONFIG,
+} from '@/common/constants/trivia-categories';
+import { QuizConfig } from '@/common/types/quiz';
+
+export const QuizConfigForm = () => {
+  const router = useRouter();
+  const [config, setConfig] = React.useState<QuizConfig>(DEFAULT_QUIZ_CONFIG);
+
+  const handleAmountChange = (value: number | readonly number[]) => {
+    const numValue = Array.isArray(value) ? value[0] : value;
+    setConfig((prev) => ({ ...prev, amount: QUIZ_AMOUNTS[numValue] }));
+  };
+
+  const handleCategoryChange = (value: string | null) => {
+    if (value) {
+      setConfig((prev) => ({ ...prev, category: parseInt(value) }));
+    }
+  };
+
+  const handleDifficultyChange = (value: string | null) => {
+    if (value) {
+      setConfig((prev) => ({ ...prev, difficulty: value }));
+    }
+  };
+
+  const handleTypeChange = (value: string | null) => {
+    if (value) {
+      setConfig((prev) => ({ ...prev, type: value }));
+    }
+  };
+
+  const handleStartQuiz = () => {
+    const params = new URLSearchParams();
+    params.set('amount', config.amount.toString());
+    if (config.category > 0) {
+      params.set('category', config.category.toString());
+    }
+    if (config.difficulty !== 'any') {
+      params.set('difficulty', config.difficulty);
+    }
+    if (config.type !== 'any') {
+      params.set('type', config.type);
+    }
+    router.push(`/quiz?${params.toString()}`);
+  };
+
+  const sliderIndex = QUIZ_AMOUNTS.indexOf(config.amount as typeof QUIZ_AMOUNTS[number]);
+
+  return (
+    <Card className="w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle className="text-2xl">Quiz Configuration</CardTitle>
+        <CardDescription className="text-base">Customize your quiz experience</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* Number of Questions - Slider */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="amount" className="text-base">Number of Questions</Label>
+            <span className="text-lg font-semibold">{config.amount}</span>
+          </div>
+          <Slider
+            id="amount"
+            min={0}
+            max={QUIZ_AMOUNTS.length - 1}
+            step={1}
+            value={[sliderIndex >= 0 ? sliderIndex : 1]}
+            onValueChange={handleAmountChange}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>{QUIZ_AMOUNTS[0]}</span>
+            <span>{QUIZ_AMOUNTS[QUIZ_AMOUNTS.length - 1]}</span>
+          </div>
+        </div>
+
+        {/* Category - Select (>4 options) */}
+        <div className="space-y-2">
+          <Label htmlFor="category" className="text-base">Select Category</Label>
+          <Select
+            value={config.category.toString()}
+            onValueChange={handleCategoryChange}
+          >
+            <SelectTrigger id="category" className="w-full">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {TRIVIA_CATEGORIES.map((item) => (
+                  <SelectItem key={item.id} value={item.id.toString()}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Difficulty - RadioGroup (4 options) */}
+        <div className="space-y-3">
+          <Label className="text-base">Select Difficulty</Label>
+          <RadioGroup
+            value={config.difficulty}
+            onValueChange={handleDifficultyChange}
+            className="grid grid-cols-2 gap-3"
+          >
+            {QUIZ_DIFFICULTIES.map((item) => (
+              <div
+                key={item.value}
+                className="flex items-center space-x-2 rounded-md border p-4 cursor-pointer hover:bg-accent"
+              >
+                <RadioGroupItem value={item.value} id={`difficulty-${item.value}`} />
+                <Label
+                  htmlFor={`difficulty-${item.value}`}
+                  className="cursor-pointer font-normal"
+                >
+                  {item.label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+
+        {/* Type - RadioGroup (3 options) */}
+        <div className="space-y-3">
+          <Label className="text-base">Select Type</Label>
+          <RadioGroup
+            value={config.type}
+            onValueChange={handleTypeChange}
+            className="grid grid-cols-3 gap-3"
+          >
+            {QUIZ_TYPES.map((item) => (
+              <div
+                key={item.value}
+                className="flex items-center space-x-2 rounded-md border p-4 cursor-pointer hover:bg-accent"
+              >
+                <RadioGroupItem value={item.value} id={`type-${item.value}`} />
+                <Label
+                  htmlFor={`type-${item.value}`}
+                  className="cursor-pointer font-normal"
+                >
+                  {item.label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+
+        <Button onClick={handleStartQuiz} className="w-full py-6 text-lg">
+          Start Quiz
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
