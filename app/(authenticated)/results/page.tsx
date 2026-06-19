@@ -133,7 +133,7 @@ export default function ResultsPage() {
 
         <div className="relative z-10 flex flex-col items-center gap-6 text-center">
           {/* Checkmark Icon */}
-          <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-border bg-card shadow-[0_0_40px_rgba(255,255,255,0.15)] sm:h-40 sm:w-40">
+          <div className="animate-check-pop flex h-32 w-32 items-center justify-center rounded-full border-4 border-border bg-card animate-check-border sm:h-40 sm:w-40">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="80"
@@ -192,7 +192,7 @@ export default function ResultsPage() {
 
           {/* Time */}
           <div className="rounded-xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
-            <p className="text-base md:text-lg text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Time taken:{' '}
               <span className="font-semibold text-foreground">{formatTime(results.timeTaken)}</span>
             </p>
@@ -214,7 +214,7 @@ export default function ResultsPage() {
           <div className="flex justify-center">
             <button
               onClick={handleRestart}
-              className="rounded-xl bg-primary px-10 py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
+              className="cursor-pointer rounded-xl bg-primary px-16 py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
             >
               Back to Home
             </button>

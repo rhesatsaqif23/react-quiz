@@ -12,15 +12,6 @@ interface GlobalTimerProps {
   totalQuestions: number;
 }
 
-function formatTime(totalSeconds: number): { mins: string; secs: string } {
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  return {
-    mins: mins.toString().padStart(2, '0'),
-    secs: secs.toString().padStart(2, '0'),
-  };
-}
-
 const QUESTION_DURATION = 30;
 
 function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps) {
@@ -44,29 +35,17 @@ function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps
     return () => clearInterval(interval);
   }, [questionStartedAt, onTimeout]);
 
-  const { mins, secs } = formatTime(remaining);
   const isLow = remaining <= 10;
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-col items-center">
-          <span className={`text-5xl font-bold tabular-nums tracking-widest sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
-            {mins}
-          </span>
-          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Minutes
-          </span>
-        </div>
-        <span className={`text-5xl font-bold sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-muted-foreground'}`}>:</span>
-        <div className="flex flex-col items-center">
-          <span className={`text-5xl font-bold tabular-nums tracking-widest sm:text-6xl md:text-7xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
-            {secs}
-          </span>
-          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Seconds
-          </span>
-        </div>
+      <div className="flex items-baseline gap-1">
+        <span className={`text-6xl font-bold tabular-nums tracking-widest sm:text-7xl md:text-8xl ${isLow ? 'text-destructive' : 'text-foreground'}`}>
+          {remaining}
+        </span>
+        <span className={`text-lg font-medium sm:text-xl ${isLow ? 'text-destructive' : 'text-muted-foreground'}`}>
+          sec
+        </span>
       </div>
     </div>
   );
@@ -92,11 +71,12 @@ export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQu
     return () => clearInterval(interval);
   }, [quizStartedAt, totalDuration]);
 
-  const { mins, secs } = formatTime(remaining);
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
   const isLow = remaining <= 60;
 
   return (
-    <div className="flex items-center gap-2 text-lg sm:text-xl text-muted-foreground">
+    <div className="flex items-center gap-2 text-lg sm:text-xl text-white/70">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="18"
@@ -111,10 +91,10 @@ export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQu
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>
-      <span className={`tabular-nums font-semibold ${isLow ? 'text-destructive' : ''}`}>
-        {mins}:{secs}
+      <span className={`tabular-nums font-semibold ${isLow ? 'text-destructive' : 'text-white/90'}`}>
+        {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
       </span>
-      <span className="text-muted-foreground/80">remaining</span>
+      <span className="text-white/50">remaining</span>
     </div>
   );
 };

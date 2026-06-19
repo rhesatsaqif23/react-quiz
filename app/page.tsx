@@ -87,7 +87,7 @@ export default function HomePage() {
         <div className="mt-24 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           <button
             onClick={handleStartQuiz}
-            className="group rounded-full border-2 border-primary/40 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-primary backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_30px_rgba(179,255,0,0.4)] sm:px-12 sm:py-5 sm:text-xl"
+            className="group cursor-pointer rounded-full border-2 border-primary/40 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-primary backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_30px_rgba(179,255,0,0.4)] sm:px-12 sm:py-5 sm:text-xl"
           >
             Start Quiz
             <svg
@@ -110,7 +110,7 @@ export default function HomePage() {
           {hasResume && (
             <button
               onClick={handleResumeQuiz}
-              className="group rounded-full border-2 border-foreground/20 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-foreground backdrop-blur-sm transition-all duration-300 hover:border-foreground/40 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black sm:px-12 sm:py-5 sm:text-xl"
+              className="group cursor-pointer rounded-full border-2 border-foreground/20 bg-muted px-10 py-2 md:py-3 text-lg font-bold text-foreground backdrop-blur-sm transition-all duration-300 hover:border-foreground/40 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black sm:px-12 sm:py-5 sm:text-xl"
             >
               Resume Quiz
               <svg

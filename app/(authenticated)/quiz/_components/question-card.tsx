@@ -35,7 +35,7 @@ export const QuestionCard = React.memo(({
             <button
               key={answer}
               onClick={() => onAnswer(answer)}
-              className={`group flex w-full items-center gap-4 rounded-xl border px-6 py-5 text-left transition-all sm:px-7 sm:py-6 ${
+              className={`group flex w-full cursor-pointer items-center gap-4 rounded-xl border px-6 py-5 text-left transition-all sm:px-7 sm:py-6 ${
                 isSelected
                   ? 'border-primary bg-primary/15 shadow-[0_0_20px_rgba(179,255,0,0.15)]'
                   : 'border-foreground/20 bg-white dark:bg-black hover:border-foreground/40 hover:bg-foreground/5'

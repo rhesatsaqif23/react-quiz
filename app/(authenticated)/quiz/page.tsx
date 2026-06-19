@@ -243,13 +243,13 @@ function QuizContent() {
               const config = getConfigFromStorage();
               fetchQuestions(config);
             }}
-            className="rounded-lg bg-muted px-6 py-3 text-sm font-medium text-foreground hover:bg-muted/80"
+            className="cursor-pointer rounded-lg bg-muted px-6 py-3 text-sm font-medium text-foreground hover:bg-muted/80"
           >
             Try Again
           </button>
           <button
             onClick={() => router.push('/')}
-            className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
+            className="cursor-pointer rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Go Back
           </button>
