@@ -73,9 +73,10 @@ export const QuizConfigForm = () => {
             onValueChange={handleAmountChange}
             className="w-full"
           />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{QUIZ_AMOUNTS[0]}</span>
-            <span>{QUIZ_AMOUNTS[QUIZ_AMOUNTS.length - 1]}</span>
+          <div className="flex justify-between text-sm text-muted-foreground px-1">
+            {QUIZ_AMOUNTS.map((amount) => (
+              <span key={amount} className="text-center w-0">{amount}</span>
+            ))}
           </div>
         </div>
 
