@@ -18,7 +18,7 @@ function formatTime(totalSeconds: number): { mins: string; secs: string } {
 }
 
 export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt, totalQuestions, onTimeout }) => {
-  const totalDuration = totalQuestions * 60;
+  const totalDuration = totalQuestions * 30;
   const [remaining, setRemaining] = React.useState(totalDuration);
   const hasTimedOut = React.useRef(false);
 

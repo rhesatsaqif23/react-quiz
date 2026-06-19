@@ -145,69 +145,62 @@ function QuizContent() {
     }
   }, [state]);
 
-  const handleAnswer = React.useCallback((answer: string) => {
-    setState((prev) => ({
-      ...prev,
-      answers: { ...prev.answers, [prev.currentIndex]: answer },
-    }));
-  }, []);
-
-  const handleNext = React.useCallback(() => {
-    setState((prev) => {
-      const nextIndex = prev.currentIndex + 1;
-      if (nextIndex >= prev.questions.length) {
-        localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
-        return { ...prev, status: 'completed' };
-      }
-      return { ...prev, currentIndex: nextIndex };
+  const completeQuiz = React.useCallback((finalState: QuizState) => {
+    let correct = 0;
+    let answered = 0;
+    const questionResults = finalState.questions.map((q, index) => {
+      const userAnswer = finalState.answers[index] ?? null;
+      const isCorrect = userAnswer === q.correctAnswer;
+      if (userAnswer !== null) answered++;
+      if (isCorrect) correct++;
+      return {
+        question: q.question,
+        category: q.category,
+        difficulty: q.difficulty,
+        correctAnswer: q.correctAnswer,
+        userAnswer,
+        isCorrect,
+      };
     });
-  }, []);
 
-  const handlePrev = React.useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      currentIndex: Math.max(0, prev.currentIndex - 1),
-    }));
-  }, []);
+    const timeTaken = Math.floor((Date.now() - finalState.startedAt) / 1000);
 
-  const handleSubmit = React.useCallback(() => {
+    const results = {
+      totalQuestions: finalState.questions.length,
+      answeredQuestions: answered,
+      correctAnswers: correct,
+      incorrectAnswers: answered - correct,
+      score: finalState.questions.length > 0 ? Math.round((correct / finalState.questions.length) * 100) : 0,
+      timeTaken,
+      questionResults,
+    };
     localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
-    setState((prev) => ({ ...prev, status: 'completed' }));
-  }, []);
+    localStorage.setItem(STORAGE_KEY_QUIZ_RESULTS, JSON.stringify(results));
+    router.push('/results');
+  }, [router]);
+
+  const handleAnswer = React.useCallback((answer: string) => {
+    setState((prev) => {
+      const newAnswers = { ...prev.answers, [prev.currentIndex]: answer };
+      const nextIndex = prev.currentIndex + 1;
+
+      if (nextIndex >= prev.questions.length) {
+        const completedState = { ...prev, answers: newAnswers, status: 'completed' as const };
+        setTimeout(() => completeQuiz(completedState), 300);
+        return { ...prev, answers: newAnswers, status: 'completed' as const };
+      }
+
+      return { ...prev, answers: newAnswers, currentIndex: nextIndex };
+    });
+  }, [completeQuiz]);
 
   const handleTimeout = React.useCallback(() => {
     setState((prev) => {
       if (prev.status !== 'active') return prev;
-      localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
+      setTimeout(() => completeQuiz(prev), 300);
       return { ...prev, status: 'timeout' };
     });
-  }, []);
-
-  React.useEffect(() => {
-    if (state.status === 'completed' || state.status === 'timeout') {
-      let correct = 0;
-      let answered = 0;
-      Object.entries(state.answers).forEach(([index, answer]) => {
-        answered++;
-        if (answer === state.questions[parseInt(index)].correctAnswer) {
-          correct++;
-        }
-      });
-
-      const timeTaken = Math.floor((Date.now() - state.startedAt) / 1000);
-
-      const results = {
-        totalQuestions: state.questions.length,
-        answeredQuestions: answered,
-        correctAnswers: correct,
-        incorrectAnswers: answered - correct,
-        score: state.questions.length > 0 ? Math.round((correct / state.questions.length) * 100) : 0,
-        timeTaken,
-      };
-      localStorage.setItem(STORAGE_KEY_QUIZ_RESULTS, JSON.stringify(results));
-      router.push('/results');
-    }
-  }, [state, router]);
+  }, [completeQuiz]);
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -255,10 +248,6 @@ function QuizContent() {
 
   const currentQuestion = state.questions[state.currentIndex];
   const answeredCount = Object.keys(state.answers).length;
-  const isFirst = state.currentIndex === 0;
-  const isLast = state.currentIndex === state.questions.length - 1;
-  const hasAnsweredCurrent = state.answers[state.currentIndex] !== undefined;
-  const allAnswered = answeredCount === state.questions.length;
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
@@ -290,63 +279,6 @@ function QuizContent() {
           onAnswer={handleAnswer}
           selectedAnswer={state.answers[state.currentIndex]}
         />
-
-        {/* Prev Button - fixed left */}
-        <button
-          onClick={handlePrev}
-          disabled={isFirst}
-          className="fixed left-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-black transition-all hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-30 dark:bg-black dark:text-white dark:hover:bg-black/80"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-
-        {/* Next Button - fixed right */}
-        {!isLast && (
-          <button
-            onClick={handleNext}
-            disabled={!hasAnsweredCurrent}
-            className="fixed right-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-black transition-all hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-30 dark:bg-black dark:text-white dark:hover:bg-black/80"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        )}
-
-        {/* Submit Button - centered bottom */}
-        {isLast && (
-          <div className="w-full max-w-lg pt-2">
-            <button
-              onClick={handleSubmit}
-              disabled={!allAnswered}
-              className="w-full rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(179,255,0,0.3)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:shadow-none"
-            >
-              Submit Quiz
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

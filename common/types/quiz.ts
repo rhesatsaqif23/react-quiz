@@ -25,6 +25,15 @@ export interface QuizState {
   status: 'idle' | 'active' | 'completed' | 'timeout';
 }
 
+export interface QuestionResult {
+  question: string;
+  category: string;
+  difficulty: string;
+  correctAnswer: string;
+  userAnswer: string | null;
+  isCorrect: boolean;
+}
+
 export interface QuizResults {
   totalQuestions: number;
   answeredQuestions: number;
@@ -32,4 +41,5 @@ export interface QuizResults {
   incorrectAnswers: number;
   score: number;
   timeTaken: number;
+  questionResults: QuestionResult[];
 }

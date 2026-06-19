@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/navbar';
-import { QuizResults } from '@/common/types/quiz';
+import { QuizResults, QuestionResult } from '@/common/types/quiz';
 
 function getInitialResults(): QuizResults | null {
   if (typeof window === 'undefined') {
@@ -21,6 +21,58 @@ function getInitialResults(): QuizResults | null {
   }
 
   return null;
+}
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  easy: 'text-green-500',
+  medium: 'text-yellow-500',
+  hard: 'text-red-500',
+};
+
+function QuestionResultCard({ result, index }: { result: QuestionResult; index: number }) {
+  return (
+    <div className={`rounded-xl border p-5 backdrop-blur-sm ${
+      result.isCorrect
+        ? 'border-green-500/30 bg-green-500/10'
+        : 'border-red-500/30 bg-red-500/10'
+    }`}>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
+            result.isCorrect
+              ? 'bg-green-500 text-white'
+              : 'bg-red-500 text-white'
+          }`}>
+            {index + 1}
+          </span>
+          <span className="text-sm text-muted-foreground">{result.category}</span>
+          <span className={`text-xs font-medium ${DIFFICULTY_COLORS[result.difficulty] ?? 'text-muted-foreground'}`}>
+            {result.difficulty}
+          </span>
+        </div>
+        <span className={`text-sm font-semibold ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+          {result.isCorrect ? 'Correct' : result.userAnswer === null ? 'Skipped' : 'Incorrect'}
+        </span>
+      </div>
+
+      <p className="text-base font-medium text-foreground mb-3">{result.question}</p>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Your answer:</span>
+          <span className={`text-sm font-medium ${result.isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+            {result.userAnswer ?? 'No answer'}
+          </span>
+        </div>
+        {!result.isCorrect && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Correct answer:</span>
+            <span className="text-sm font-medium text-green-500">{result.correctAnswer}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ResultsPage() {
@@ -124,19 +176,19 @@ export default function ResultsPage() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold text-foreground">{results.totalQuestions}</div>
-              <p className="mt-1 text-sm md:text-base font-medium text-muted-foreground">Total Questions</p>
+              <p className="mt-1 text-sm text-muted-foreground">Total Questions</p>
             </div>
             <div className="rounded-xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold text-foreground">{results.answeredQuestions}</div>
-              <p className="mt-1 text-sm md:text-base font-medium text-muted-foreground">Answered</p>
+              <p className="mt-1 text-sm text-muted-foreground">Answered</p>
             </div>
             <div className="rounded-xl border border-primary/30 bg-primary/10 p-5 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold text-primary">{results.correctAnswers}</div>
-              <p className="mt-1 text-sm md:text-base font-medium text-muted-foreground">Correct</p>
+              <p className="mt-1 text-sm text-muted-foreground">Correct</p>
             </div>
             <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-5 text-center backdrop-blur-sm">
               <div className="text-3xl font-bold text-destructive">{results.incorrectAnswers}</div>
-              <p className="mt-1 text-sm md:text-base font-medium text-muted-foreground">Incorrect</p>
+              <p className="mt-1 text-sm text-muted-foreground">Incorrect</p>
             </div>
           </div>
 
@@ -148,12 +200,24 @@ export default function ResultsPage() {
             </p>
           </div>
 
+          {/* Per-Question Results */}
+          {results.questionResults && results.questionResults.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground">Question Review</h2>
+              <div className="space-y-4">
+                {results.questionResults.map((result, index) => (
+                  <QuestionResultCard key={index} result={result} index={index} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Restart Button */}
           <button
             onClick={handleRestart}
-            className="w-full rounded-xl bg-primary py-2 md:py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
+            className="w-full rounded-xl bg-primary py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)]"
           >
-            Back to Home
+            Restart Quiz
           </button>
         </div>
       </div>
