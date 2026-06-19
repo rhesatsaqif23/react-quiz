@@ -24,6 +24,7 @@ import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { db } from '@/libs/prisma';
 
+// Initialize NextAuth with providers and configuration
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -32,6 +33,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
+      // Validate credentials and return user object or null
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
@@ -66,12 +68,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
   },
   callbacks: {
+    // Add user ID to JWT token
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
       return token;
     },
+    // Add user ID to session object
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;

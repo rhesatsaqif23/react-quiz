@@ -20,14 +20,17 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
+// Custom hook for authentication state and functions
 export const useAuth = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  // Check if user is authenticated or loading
   const isAuthenticated = status === 'authenticated';
   const isLoading = status === 'loading';
   const user = session?.user;
 
+  // Sign out and redirect to login page
   const logout = useCallback(async () => {
     await signOut({ redirect: false });
     router.push('/login');

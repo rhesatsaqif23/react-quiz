@@ -34,6 +34,7 @@ export const Navbar = () => {
   const isAuthenticated = status === 'authenticated';
   const isLoading = status === 'loading';
 
+  // Sign out and redirect to login page
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push('/login');
@@ -59,6 +60,7 @@ export const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+          {/* Conditional rendering based on auth status */}
           {isLoading ? null : isAuthenticated ? (
             <div className="flex items-center gap-4">
               <span className="hidden text-base font-semibold text-foreground sm:block">

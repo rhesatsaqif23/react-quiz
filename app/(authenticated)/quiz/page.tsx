@@ -33,10 +33,12 @@ import { QuestionCard } from './_components/question-card';
 import { QuestionTimer, GlobalTimer } from './_components/quiz-timer';
 import { QuizProgress } from './_components/quiz-progress';
 
+// LocalStorage keys for quiz data
 const STORAGE_KEY_QUIZ_STATE = 'quizState';
 const STORAGE_KEY_QUIZ_CONFIG = 'quizConfig';
 const STORAGE_KEY_QUIZ_RESULTS = 'quizResults';
 
+// Get quiz configuration from localStorage
 function getConfigFromStorage(): QuizConfig {
   if (typeof window === 'undefined') {
     return DEFAULT_QUIZ_CONFIG;
@@ -52,6 +54,7 @@ function getConfigFromStorage(): QuizConfig {
   return DEFAULT_QUIZ_CONFIG;
 }
 
+// Get initial quiz state from localStorage or create new
 function getInitialState(): QuizState {
   if (typeof window === 'undefined') {
     return {
@@ -96,6 +99,7 @@ function QuizContent() {
   const [error, setError] = React.useState<string | null>(null);
   const fetchInitiated = React.useRef(false);
 
+  // Fetch questions from Open Trivia Database API
   const fetchQuestions = React.useCallback(async (quizConfig: QuizConfig) => {
     if (fetchInitiated.current) return;
     fetchInitiated.current = true;
@@ -103,6 +107,7 @@ function QuizContent() {
     setIsLoading(true);
     setError(null);
     try {
+      // Build query parameters from config
       const params = new URLSearchParams();
       params.set('amount', quizConfig.amount.toString());
       if (quizConfig.category > 0) {
@@ -122,6 +127,7 @@ function QuizContent() {
         throw new Error('Failed to fetch questions. Please try again.');
       }
 
+      // Decode and format questions from API
       const questions = data.results.map(
         (q: Record<string, unknown>, index: number) => ({
           ...decodeQuizQuestion(q as {
@@ -157,6 +163,7 @@ function QuizContent() {
     }
   }, []);
 
+  // Fetch questions on initial load if needed
   React.useEffect(() => {
     if (state.status === 'idle' && state.questions.length === 0 && !fetchInitiated.current) {
       const config = getConfigFromStorage();
@@ -164,12 +171,14 @@ function QuizContent() {
     }
   }, [state.status, state.questions.length, fetchQuestions]);
 
+  // Save quiz state to localStorage for resume capability
   React.useEffect(() => {
     if (state.status === 'active' && state.questions.length > 0) {
       localStorage.setItem(STORAGE_KEY_QUIZ_STATE, JSON.stringify(state));
     }
   }, [state]);
 
+  // Complete quiz and calculate results
   const completeQuiz = React.useCallback((finalState: QuizState) => {
     let correct = 0;
     let answered = 0;
@@ -188,8 +197,10 @@ function QuizContent() {
       };
     });
 
+    // Calculate time taken in seconds
     const timeTaken = Math.floor((Date.now() - finalState.startedAt) / 1000);
 
+    // Store results and redirect
     const results = {
       totalQuestions: finalState.questions.length,
       answeredQuestions: answered,
@@ -204,17 +215,20 @@ function QuizContent() {
     router.push('/results');
   }, [router]);
 
+  // Handle answer selection and advance to next question
   const handleAnswer = React.useCallback((answer: string) => {
     setState((prev) => {
       const newAnswers = { ...prev.answers, [prev.currentIndex]: answer };
       const nextIndex = prev.currentIndex + 1;
 
+      // Complete quiz if last question
       if (nextIndex >= prev.questions.length) {
         const completedState = { ...prev, answers: newAnswers, status: 'completed' as const };
         setTimeout(() => completeQuiz(completedState), 1000);
         return { ...prev, answers: newAnswers, status: 'completed' as const };
       }
 
+      // Move to next question after delay
       setTimeout(() => {
         setState((s) => ({ ...s, currentIndex: nextIndex }));
         setQuestionStartedAt(Date.now());
@@ -224,11 +238,13 @@ function QuizContent() {
     });
   }, [completeQuiz]);
 
+  // Handle question timeout and advance to next
   const handleQuestionTimeout = React.useCallback(() => {
     setState((prev) => {
       if (prev.status !== 'active') return prev;
       const nextIndex = prev.currentIndex + 1;
 
+      // Complete quiz if last question
       if (nextIndex >= prev.questions.length) {
         const completedState = { ...prev, status: 'timeout' as const };
         setTimeout(() => completeQuiz(completedState), 300);

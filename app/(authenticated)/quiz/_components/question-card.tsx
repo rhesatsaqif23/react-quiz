@@ -29,6 +29,7 @@ interface QuestionCardProps {
   selectedAnswer?: string;
 }
 
+// Letters for answer option labels
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
 export const QuestionCard = React.memo(({
@@ -46,6 +47,7 @@ export const QuestionCard = React.memo(({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {question.allAnswers.map((answer, index) => {
+          // Check if this answer is selected
           const isSelected = selectedAnswer === answer;
           const letter = OPTION_LETTERS[index] ?? String(index + 1);
 

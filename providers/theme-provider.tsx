@@ -14,6 +14,7 @@
 import * as React from 'react';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
+// Wrap app with next-themes ThemeProvider for dark/light mode
 export function ThemeProvider({
   children,
   ...props

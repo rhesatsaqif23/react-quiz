@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+// Zod validation schema for registration form
 const registerSchema = z.object({
   name: z
     .string()
@@ -70,10 +71,12 @@ export const RegisterForm = () => {
     resolver: zodResolver(registerSchema),
   });
 
+  // Handle form submission with registration API
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
 
     try {
+      // Send registration request to API
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -97,6 +100,7 @@ export const RegisterForm = () => {
         return;
       }
 
+      // Auto-login after successful registration
       const signInResult = await signIn('credentials', {
         email: data.email,
         password: data.password,

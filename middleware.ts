@@ -17,6 +17,7 @@
 import { auth } from '@/libs/auth';
 import { NextResponse } from 'next/server';
 
+// Protect routes by checking for valid session
 export default auth((req) => {
   if (!req.auth && req.nextUrl.pathname.startsWith('/quiz')) {
     return NextResponse.redirect(new URL('/login', req.url));
@@ -27,6 +28,7 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
+// Routes that require authentication
 export const config = {
   matcher: ['/quiz/:path*', '/results/:path*'],
 };

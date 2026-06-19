@@ -20,14 +20,17 @@
 import * as React from 'react';
 import { useTheme } from 'next-themes';
 
+// Theme toggle button with sun/moon icons
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  // Handle hydration mismatch with mounted state
   const mounted = React.useSyncExternalStore(
     () => () => {},
     () => true,
     () => false
   );
 
+  // Render empty button during SSR
   if (!mounted) {
     return (
       <button
@@ -39,10 +42,12 @@ export function ThemeToggle() {
     );
   }
 
+  // Check if current theme is dark
   const isDark = theme === 'dark';
 
   return (
     <button
+      // Toggle between dark and light themes
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground backdrop-blur-sm transition-colors hover:bg-muted/80"
       aria-label="Toggle theme"

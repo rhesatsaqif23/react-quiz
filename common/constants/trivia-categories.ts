@@ -12,6 +12,7 @@
  * These constants are used by the QuizConfigForm component and quiz state management.
  */
 
+// Available trivia categories from Open Trivia Database
 export const TRIVIA_CATEGORIES = [
   { id: 0, name: 'Any Category' },
   { id: 9, name: 'General Knowledge' },
@@ -40,6 +41,7 @@ export const TRIVIA_CATEGORIES = [
   { id: 32, name: 'Entertainment: Cartoon & Animations' },
 ] as const;
 
+// Available difficulty levels for quiz questions
 export const QUIZ_DIFFICULTIES = [
   { value: 'any', label: 'Any Difficulty' },
   { value: 'easy', label: 'Easy' },
@@ -47,14 +49,17 @@ export const QUIZ_DIFFICULTIES = [
   { value: 'hard', label: 'Hard' },
 ] as const;
 
+// Available question types for quiz
 export const QUIZ_TYPES = [
   { value: 'any', label: 'Any Type' },
   { value: 'multiple', label: 'Multiple Choice' },
   { value: 'boolean', label: 'True / False' },
 ] as const;
 
+// Available question counts for quiz
 export const QUIZ_AMOUNTS = [5, 10, 15, 20, 25, 30] as const;
 
+// Default quiz configuration values
 export const DEFAULT_QUIZ_CONFIG = {
   amount: 10,
   category: 0,

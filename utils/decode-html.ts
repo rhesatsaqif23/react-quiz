@@ -18,9 +18,10 @@
  * - decodeQuizQuestion: Function to decode and format quiz questions
  */
 
+// Decode HTML entities to plain text
 export const decodeHtml = (html: string): string => {
+  // Server-side: use regex-based decoder when window is undefined
   if (typeof window === 'undefined') {
-    // Server-side: use a simple regex-based decoder
     return html
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
@@ -42,20 +43,23 @@ export const decodeHtml = (html: string): string => {
       );
   }
 
-  // Client-side: use DOM parser
+  // Client-side: use DOM parser for decoding
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
   return txt.value;
 };
 
+// Decode and format a quiz question with shuffled answers
 export const decodeQuizQuestion = <
   T extends { question: string; correct_answer: string; incorrect_answers: string[] }
 >(
   question: T
 ): T & { allAnswers: string[] } => {
+  // Decode question text and answer options
   const decodedQuestion = decodeHtml(question.question);
   const decodedCorrect = decodeHtml(question.correct_answer);
   const decodedIncorrect = question.incorrect_answers.map(decodeHtml);
+  // Shuffle all answers randomly
   const allAnswers = [...decodedIncorrect, decodedCorrect].sort(
     () => Math.random() - 0.5
   );

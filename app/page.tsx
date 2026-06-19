@@ -21,8 +21,10 @@ import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/navbar';
 import { QuizConfigDialog } from './(public)/_components/quiz-config-dialog';
 
+// LocalStorage key for saving quiz state
 const STORAGE_KEY_QUIZ_STATE = 'quizState';
 
+// Check if there's an active quiz in localStorage
 function hasActiveQuiz(): boolean {
   if (typeof window === 'undefined') return false;
   try {
@@ -47,6 +49,7 @@ export default function HomePage() {
     () => false,
   );
 
+  // Open quiz config dialog or redirect to login
   const handleStartQuiz = () => {
     if (!isAuthenticated) {
       router.push('/login');
@@ -55,6 +58,7 @@ export default function HomePage() {
     setDialogOpen(true);
   };
 
+  // Resume saved quiz or redirect to login
   const handleResumeQuiz = () => {
     if (!isAuthenticated) {
       router.push('/login');

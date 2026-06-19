@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+// Zod validation schema for login form
 const loginSchema = z.object({
   email: z
     .string()
@@ -54,6 +55,7 @@ export const LoginForm = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // Handle form submission with NextAuth signIn
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
 

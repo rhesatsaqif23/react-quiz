@@ -32,18 +32,22 @@ interface GlobalTimerProps {
   totalQuestions: number;
 }
 
+// Time limit per question in seconds
 const QUESTION_DURATION = 30;
 
+// Per-question countdown timer component
 function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps) {
   const [remaining, setRemaining] = React.useState(QUESTION_DURATION);
   const hasTimedOut = React.useRef(false);
 
+  // Update remaining time every second
   React.useEffect(() => {
     const tick = () => {
       const elapsed = Math.floor((Date.now() - questionStartedAt) / 1000);
       const left = Math.max(0, QUESTION_DURATION - elapsed);
       setRemaining(left);
 
+      // Trigger timeout callback when time expires
       if (left <= 0 && !hasTimedOut.current) {
         hasTimedOut.current = true;
         onTimeout();
@@ -55,6 +59,7 @@ function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps
     return () => clearInterval(interval);
   }, [questionStartedAt, onTimeout]);
 
+  // Turn red when time is running low
   const isLow = remaining <= 10;
 
   return (
@@ -71,14 +76,17 @@ function QuestionTimerInner({ questionStartedAt, onTimeout }: QuestionTimerProps
   );
 }
 
+// QuestionTimer wrapper that resets on question change
 export const QuestionTimer: React.FC<QuestionTimerProps> = (props) => (
   <QuestionTimerInner key={props.questionStartedAt} {...props} />
 );
 
+// Overall quiz timer showing total remaining time
 export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQuestions }) => {
   const totalDuration = totalQuestions * 30;
   const [remaining, setRemaining] = React.useState(totalDuration);
 
+  // Update remaining time every second
   React.useEffect(() => {
     const tick = () => {
       const elapsed = Math.floor((Date.now() - quizStartedAt) / 1000);
@@ -91,8 +99,10 @@ export const GlobalTimer: React.FC<GlobalTimerProps> = ({ quizStartedAt, totalQu
     return () => clearInterval(interval);
   }, [quizStartedAt, totalDuration]);
 
+  // Format time as MM:SS
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
+  // Turn red when time is running low
   const isLow = remaining <= 60;
 
   return (

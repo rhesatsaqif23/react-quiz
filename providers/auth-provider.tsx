@@ -17,6 +17,7 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+// Wrap app with NextAuth SessionProvider for auth context
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   return <SessionProvider>{children}</SessionProvider>;
 };

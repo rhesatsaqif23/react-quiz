@@ -27,6 +27,7 @@ import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/navbar';
 import { QuizResults, QuestionResult } from '@/common/types/quiz';
 
+// Load quiz results from localStorage
 function getInitialResults(): QuizResults | null {
   if (typeof window === 'undefined') {
     return null;
@@ -44,6 +45,7 @@ function getInitialResults(): QuizResults | null {
   return null;
 }
 
+// Color classes for difficulty levels
 const DIFFICULTY_COLORS: Record<string, string> = {
   easy: 'text-green-500',
   medium: 'text-yellow-500',
@@ -111,6 +113,7 @@ export default function ResultsPage() {
     }
   }, [results, router, status]);
 
+  // Clear results and go back to home
   const handleRestart = () => {
     localStorage.removeItem('quizResults');
     router.push('/');
@@ -124,6 +127,7 @@ export default function ResultsPage() {
     );
   }
 
+  // Get motivational message based on score
   const getScoreMessage = (score: number): string => {
     if (score >= 80) return 'Excellent! Great job!';
     if (score >= 60) return 'Good work! Keep it up!';
@@ -131,6 +135,7 @@ export default function ResultsPage() {
     return 'Keep practicing!';
   };
 
+  // Format seconds to readable time string
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
