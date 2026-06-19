@@ -111,6 +111,7 @@ export const QuizConfigForm = () => {
           {QUIZ_DIFFICULTIES.map((item) => (
             <div
               key={item.value}
+              onClick={() => setConfig((prev) => ({ ...prev, difficulty: item.value }))}
               className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent"
             >
               <RadioGroupItem value={item.value} id={`difficulty-${item.value}`} />
@@ -137,6 +138,7 @@ export const QuizConfigForm = () => {
           {QUIZ_TYPES.map((item) => (
             <div
               key={item.value}
+              onClick={() => setConfig((prev) => ({ ...prev, type: item.value }))}
               className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-accent"
             >
               <RadioGroupItem value={item.value} id={`type-${item.value}`} />
