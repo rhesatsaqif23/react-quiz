@@ -3,11 +3,10 @@
 import React, { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { QuizConfig, QuizState } from '@/common/types/quiz';
 import { DEFAULT_QUIZ_CONFIG } from '@/common/constants/trivia-categories';
 import { decodeQuizQuestion } from '@/utils/decode-html';
+import { Navbar } from '@/components/navbar';
 import { QuestionCard } from './_components/question-card';
 import { QuizTimer } from './_components/quiz-timer';
 import { QuizProgress } from './_components/quiz-progress';
@@ -147,29 +146,33 @@ function QuizContent() {
   }, [state]);
 
   const handleAnswer = React.useCallback((answer: string) => {
+    setState((prev) => ({
+      ...prev,
+      answers: { ...prev.answers, [prev.currentIndex]: answer },
+    }));
+  }, []);
+
+  const handleNext = React.useCallback(() => {
     setState((prev) => {
-      const newAnswers = {
-        ...prev.answers,
-        [prev.currentIndex]: answer,
-      };
       const nextIndex = prev.currentIndex + 1;
-      const isLastQuestion = nextIndex >= prev.questions.length;
-
-      if (isLastQuestion) {
+      if (nextIndex >= prev.questions.length) {
         localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
-        return {
-          ...prev,
-          answers: newAnswers,
-          status: 'completed',
-        };
+        return { ...prev, status: 'completed' };
       }
-
-      return {
-        ...prev,
-        answers: newAnswers,
-        currentIndex: nextIndex,
-      };
+      return { ...prev, currentIndex: nextIndex };
     });
+  }, []);
+
+  const handlePrev = React.useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      currentIndex: Math.max(0, prev.currentIndex - 1),
+    }));
+  }, []);
+
+  const handleSubmit = React.useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY_QUIZ_STATE);
+    setState((prev) => ({ ...prev, status: 'completed' }));
   }, []);
 
   React.useEffect(() => {
@@ -205,40 +208,35 @@ function QuizContent() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-3xl">
-          <CardContent className="flex items-center justify-center p-8">
-            <p>Loading questions...</p>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <p className="text-lg text-white/60">Loading questions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-3xl">
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-destructive">{error}</p>
-            <div className="flex gap-4">
-              <Button onClick={() => {
-                fetchInitiated.current = false;
-                setError(null);
-                const config = getConfigFromStorage();
-                fetchQuestions(config);
-              }}>
-                Try Again
-              </Button>
-              <Button variant="outline" onClick={() => router.push('/')}>
-                Go Back
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-black p-4">
+        <p className="mb-4 text-lg text-red-400">{error}</p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              fetchInitiated.current = false;
+              setError(null);
+              const config = getConfigFromStorage();
+              fetchQuestions(config);
+            }}
+            className="rounded-lg bg-white/10 px-6 py-3 text-sm font-medium text-white hover:bg-white/20"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="rounded-lg border border-white/20 px-6 py-3 text-sm font-medium text-white/70 hover:bg-white/10"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -249,16 +247,33 @@ function QuizContent() {
 
   const currentQuestion = state.questions[state.currentIndex];
   const answeredCount = Object.keys(state.answers).length;
+  const isFirst = state.currentIndex === 0;
+  const isLast = state.currentIndex === state.questions.length - 1;
+  const hasAnsweredCurrent = state.answers[state.currentIndex] !== undefined;
+  const allAnswered = answeredCount === state.questions.length;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <div className="w-full max-w-3xl space-y-6">
-        <QuizTimer startedAt={state.startedAt} />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-800" />
+      <div className="absolute top-20 left-32 h-72 w-72 rotate-12 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl blur-sm sm:h-96 sm:w-40" />
+      <div className="absolute top-40 left-48 h-64 w-48 -rotate-12 bg-gradient-to-b from-zinc-600/30 to-zinc-800/50 shadow-xl sm:left-64 sm:h-80 sm:w-32" />
+      <div className="absolute right-32 bottom-40 h-56 w-56 rotate-45 bg-gradient-to-br from-zinc-700/40 to-zinc-900/60 shadow-2xl sm:right-48 sm:h-72 sm:w-28" />
+      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-b from-transparent via-transparent to-black/50" />
+
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10 pt-24 sm:px-8">
         <QuizProgress
           currentQuestion={state.currentIndex + 1}
           totalQuestions={state.questions.length}
           answeredQuestions={answeredCount}
         />
+
+        <QuizTimer startedAt={state.startedAt} />
+
         <QuestionCard
           question={currentQuestion}
           questionNumber={state.currentIndex + 1}
@@ -266,6 +281,59 @@ function QuizContent() {
           onAnswer={handleAnswer}
           selectedAnswer={state.answers[state.currentIndex]}
         />
+
+        {/* Navigation */}
+        <div className="flex w-full max-w-lg items-center justify-between gap-4">
+          <button
+            onClick={handlePrev}
+            disabled={isFirst}
+            className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/5 text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+
+          {isLast ? (
+            <button
+              onClick={handleSubmit}
+              disabled={!allAnswered}
+              className="flex-1 rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground transition-all hover:shadow-[0_0_20px_rgba(179,255,0,0.3)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:shadow-none"
+            >
+              Submit Quiz
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              disabled={!hasAnsweredCurrent}
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/5 text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -275,8 +343,8 @@ export default function QuizPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <p>Loading...</p>
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <p className="text-lg text-white/60">Loading...</p>
         </div>
       }
     >

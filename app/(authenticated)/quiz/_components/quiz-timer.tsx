@@ -6,10 +6,13 @@ interface QuizTimerProps {
   startedAt: number;
 }
 
-function formatElapsed(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+function formatElapsed(totalSeconds: number): { mins: string; secs: string } {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return {
+    mins: mins.toString().padStart(2, '0'),
+    secs: secs.toString().padStart(2, '0'),
+  };
 }
 
 export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt }) => {
@@ -24,13 +27,28 @@ export const QuizTimer: React.FC<QuizTimerProps> = ({ startedAt }) => {
     return () => clearInterval(interval);
   }, [startedAt]);
 
+  const { mins, secs } = formatElapsed(elapsed);
+
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-muted-foreground">Time Elapsed</span>
-        <span className="text-lg font-semibold tabular-nums">
-          {formatElapsed(elapsed)}
-        </span>
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center">
+          <span className="text-5xl font-bold tabular-nums tracking-widest text-white sm:text-6xl md:text-7xl">
+            {mins}
+          </span>
+          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-white/60">
+            Minutes
+          </span>
+        </div>
+        <span className="text-5xl font-bold text-white/30 sm:text-6xl md:text-7xl">:</span>
+        <div className="flex flex-col items-center">
+          <span className="text-5xl font-bold tabular-nums tracking-widest text-white sm:text-6xl md:text-7xl">
+            {secs}
+          </span>
+          <span className="mt-1 text-xs font-medium uppercase tracking-widest text-white/60">
+            Seconds
+          </span>
+        </div>
       </div>
     </div>
   );

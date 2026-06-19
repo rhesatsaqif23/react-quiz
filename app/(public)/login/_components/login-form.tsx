@@ -6,9 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 const loginSchema = z.object({
@@ -27,6 +25,7 @@ export const LoginForm = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -61,57 +60,91 @@ export const LoginForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Sign in to start the quiz</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-              {error}
-            </div>
-          )}
+    <div className="w-full max-w-md space-y-8">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          Login
+        </h1>
+        <p className="mt-3 text-xl md:text-2xl font-medium text-white/80">
+          Sign in to start the quiz
+        </p>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+        {error && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+            {error}
           </div>
+        )}
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-base font-medium text-white">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            {...register('email')}
+            className="h-12 border-white/10 bg-white/5 text-base text-white placeholder:text-white/30 focus:border-primary focus:ring-primary/30"
+          />
+          {errors.email && (
+            <p className="text-sm text-red-400">{errors.email.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-base font-medium text-white">
+            Password
+          </Label>
+          <div className="relative">
             <Input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Enter your password"
               {...register('password')}
+              className="h-12 border-white/10 bg-white/5 pr-12 text-base text-white placeholder:text-white/30 focus:border-primary focus:ring-primary/30"
             />
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                  <line x1="2" x2="22" y1="2" y2="22" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
           </div>
+          {errors.password && (
+            <p className="text-sm text-red-400">{errors.password.message}</p>
+          )}
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full rounded-xl bg-primary py-2 md:py-3 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_30px_rgba(179,255,0,0.3)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
+        >
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <a href="/register" className="text-primary hover:underline">
-              Register
-            </a>
-          </p>
-        </form>
-      </CardContent>
-    </Card>
+        <p className="text-center text-base text-white/60">
+          Don&apos;t have an account?{' '}
+          <a href="/register" className="font-semibold text-primary hover:underline">
+            Register
+          </a>
+        </p>
+      </form>
+    </div>
   );
 };

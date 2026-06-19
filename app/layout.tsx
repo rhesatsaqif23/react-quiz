@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Jost } from 'next/font/google';
 import { AuthProvider } from '@/providers/auth-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import './globals.css';
 
-const poppins = Poppins({
-  variable: '--font-poppins',
+const jost = Jost({
+  variable: '--font-jost',
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
 });
@@ -20,9 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${jost.variable} min-h-full flex flex-col font-sans antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
